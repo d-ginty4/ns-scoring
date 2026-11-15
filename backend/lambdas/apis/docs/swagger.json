@@ -1,0 +1,20 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Documentation for all the apis. Every /api/v1 JSON response uses responses.Envelope with requestID, data, and error fields.",
+        "title": "APIs",
+        "contact": {},
+        "version": "0.1"
+    },
+    "host": "localhost:3000",
+    "basePath": "/api",
+    "paths": {},
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a space and the JWT.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

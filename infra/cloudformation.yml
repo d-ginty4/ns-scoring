@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Terraform state file buckets (S3 state)
+
+Resources:
+  BackendStateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        !Sub ns-scoring-terraform-backend-${AWS::AccountId}-${AWS::Region}
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: StateRetention
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 30
+
+  FrontendStateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        !Sub ns-scoring-terraform-frontend-${AWS::AccountId}-${AWS::Region}
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: StateRetention
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 30

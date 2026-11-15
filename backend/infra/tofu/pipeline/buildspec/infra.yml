@@ -1,0 +1,33 @@
+version: 0.2
+
+env:
+  variables:
+    TOFU_VERSION: "1.13.2"
+
+phases:
+  install:
+    commands:
+      - echo "Installing OpenTofu ${TOFU_VERSION}..."
+      - curl -sL "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip" -o /tmp/tofu.zip
+      - unzip -o /tmp/tofu.zip -d /usr/local/bin/
+      - tofu version
+
+  pre_build:
+    commands:
+      - echo "Deploying infra for environment ${ENVIRONMENT} in ${AWS_REGION}"
+
+  build:
+    commands:
+      - cd "infra/tofu/environments/${ENVIRONMENT}"
+      - tofu init
+      - tofu apply -auto-approve
+
+  post_build:
+    commands:
+      - echo "Infra apply complete"
+      - tofu output -json > /tmp/tofu-outputs.json || true
+
+artifacts:
+  files:
+    - /tmp/tofu-outputs.json
+  discard-paths: yes

@@ -1,0 +1,67 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      golang: 1.25
+    commands:
+      - go version
+
+  pre_build:
+    commands:
+      - echo "Building Lambda ${LAMBDA_FUNCTION_NAME}"
+
+  build:
+    commands:
+      - cd lambdas/apis
+      - GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o bootstrap .
+      - zip apis.zip bootstrap
+      - aws s3 cp apis.zip "s3://${ARTIFACT_BUCKET}/apis.zip"
+      - |
+        set -euo pipefail
+
+        CURRENT_VERSION=$(aws lambda get-alias \
+          --function-name "${LAMBDA_FUNCTION_NAME}" \
+          --name "${LAMBDA_ALIAS_NAME}" \
+          --query 'FunctionVersion' \
+          --output text)
+        echo "Current live version: ${CURRENT_VERSION}"
+
+        NEW_VERSION=$(aws lambda update-function-code \
+          --function-name "${LAMBDA_FUNCTION_NAME}" \
+          --s3-bucket "${ARTIFACT_BUCKET}" \
+          --s3-key "apis.zip" \
+          --publish \
+          --query 'Version' \
+          --output text)
+        echo "Published Lambda version: ${NEW_VERSION}"
+
+        if [ -z "${CURRENT_VERSION}" ] || [ "${CURRENT_VERSION}" = "None" ] || [ "${CURRENT_VERSION}" = "\$LATEST" ]; then
+          echo "ERROR: CurrentVersion is empty or invalid (${CURRENT_VERSION}). Check alias '${LAMBDA_ALIAS_NAME}' exists on function '${LAMBDA_FUNCTION_NAME}'."
+          exit 1
+        fi
+
+        if [ -z "${NEW_VERSION}" ] || [ "${NEW_VERSION}" = "None" ]; then
+          echo "ERROR: TargetVersion is empty or invalid (${NEW_VERSION}). Check Lambda update/publish permissions."
+          exit 1
+        fi
+
+        cat > appspec.yaml <<EOF
+        version: 0.0
+        Resources:
+          - ApisLambda:
+              Type: AWS::Lambda::Function
+              Properties:
+                Name: ${LAMBDA_FUNCTION_NAME}
+                Alias: ${LAMBDA_ALIAS_NAME}
+                CurrentVersion: "${CURRENT_VERSION}"
+                TargetVersion: "${NEW_VERSION}"
+        EOF
+
+        echo "Generated AppSpec:"
+        cat appspec.yaml
+
+artifacts:
+  files:
+    - lambdas/apis/appspec.yaml
+  discard-paths: yes

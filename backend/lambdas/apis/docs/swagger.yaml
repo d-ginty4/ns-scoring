@@ -1,0 +1,16 @@
+basePath: /api
+host: localhost:3000
+info:
+  contact: {}
+  description: Documentation for all the apis. Every /api/v1 JSON response uses responses.Envelope
+    with requestID, data, and error fields.
+  title: APIs
+  version: "0.1"
+paths: {}
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and the JWT.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
