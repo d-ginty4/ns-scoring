@@ -10,10 +10,8 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger/v2"
 )
 
-var middlewareGroups = middleware.GetMiddlewareGrous()
-
 // @title APIs
-// @version 0.1
+// @version 1
 // @description Documentation for all the apis. Every /api/v1 JSON response uses responses.Envelope with requestID, data, and error fields.
 // @host localhost:3000
 // @BasePath /api
@@ -30,13 +28,14 @@ func SetupRoutes(e *echo.Echo) {
 	// Base path
 	base := e.Group("/api/v1")
 
-	// Region Routes
+	// Region Routes (/api/v1/regions)
 	regionGroup := base.Group("/regions")
 	regionGroup.POST("", regionRoutes.PostRegion)
 	regionGroup.GET("", regionRoutes.QueryRegions)
-	regionGroup.GET(":regionId", regionRoutes.GetRegion)
-	regionGroup.PUT(":regionId", regionRoutes.PutRegion)
-	regionGroup.DELETE(":regionId", regionRoutes.DeleteRegion)
+	regionGroupID := regionGroup.Group("/:regionID", middleware.CheckRegionExist)
+	regionGroupID.GET("", regionRoutes.GetRegion)
+	regionGroupID.PUT("", regionRoutes.PutRegion)
+	regionGroupID.DELETE("", regionRoutes.DeleteRegion)
 
 	// Special route to return all available routes
 	e.GET("/routes", func(c *echo.Context) error {

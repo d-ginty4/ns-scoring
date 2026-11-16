@@ -1,7 +1,7 @@
 .PHONY : run tables docs
 
 run:
-	APP_ENV=local go run main.go
+	LOG_LEVEL=debug APP_ENV=local go run main.go
 
 tables:
 	bash ./local/createTables.sh

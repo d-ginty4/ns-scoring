@@ -42,6 +42,11 @@ func mapError(c *echo.Context, err error) (int, APIError) {
 		return http.StatusNotFound, APIError{Message: nferr.Error()}
 	}
 
+	var uniqueField *exceptions.ErrUniqueField
+	if errors.As(err, &uniqueField) {
+		return http.StatusBadRequest, APIError{Message: uniqueField.Error()}
+	}
+
 	var he *echo.HTTPError
 	if errors.As(err, &he) {
 		msg := httpErrorMessage(he)

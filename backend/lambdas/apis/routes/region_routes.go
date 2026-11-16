@@ -1,10 +1,8 @@
 package routes
 
 import (
-	"errors"
 	"net/http"
 
-	"apis/exceptions"
 	"apis/models"
 	"apis/responses"
 	"apis/service"
@@ -71,15 +69,16 @@ func postRegion(ctx *echo.Context) error {
 }
 
 func getRegion(ctx *echo.Context) error {
-	regionService := service.GetRegionService()
+	region, ok := ctx.Get("region").(*models.Region)
+	if ok && region != nil {
+		return responses.Success(ctx, http.StatusOK, region)
+	}
 
+	regionService := service.GetRegionService()
 	id := ctx.Param("regionID")
 
 	region, err := regionService.GetRegion(ctx, id)
 	if err != nil {
-		if errors.Is(err, &exceptions.ErrNotFound{}) {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
-		}
 		return err
 	}
 
@@ -89,18 +88,14 @@ func getRegion(ctx *echo.Context) error {
 func putRegion(ctx *echo.Context) error {
 	service := service.GetRegionService()
 
-	existing, ok := ctx.Get("region").(*models.Region)
-	if !ok || existing == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get existing region")
-	}
-
 	var p models.RegionRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
 	id := ctx.Param("regionID")
-	region, err := service.UpdateRegion(ctx, id, &p, existing)
+	existingRegion, _ := ctx.Get("region").(*models.Region)
+	region, err := service.UpdateRegion(ctx, id, &p, existingRegion)
 	if err != nil {
 		return err
 	}

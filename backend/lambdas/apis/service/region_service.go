@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"apis/exceptions"
@@ -9,6 +10,7 @@ import (
 	"apis/repository"
 
 	"github.com/labstack/echo/v5"
+	"gorm.io/gorm"
 )
 
 type RegionService struct {
@@ -56,11 +58,10 @@ func getRegion(ctx *echo.Context, id string) (*models.Region, error) {
 
 	region, err := regionRepository.GetRegion(ctx, id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, exceptions.NewErrNotFound(fmt.Sprintf("Region with id %s not found", id))
+		}
 		return nil, err
-	}
-
-	if region == nil {
-		return nil, exceptions.NewErrNotFound(fmt.Sprintf("Region with id %s not found", id))
 	}
 
 	logger.Action(ctx, "get_region", "regionID", region.ID)
@@ -74,7 +75,10 @@ func createRegion(ctx *echo.Context, req *models.RegionRequest) (*models.Region,
 		RegionRequest: *req,
 	}
 
-	if err := repository.UpdateRegion(ctx, &region); err != nil {
+	if err := repository.PutRegion(ctx, &region); err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, exceptions.NewErrUniqueField(fmt.Sprintf("region with name %s already exists", region.Name))
+		}
 		return nil, err
 	}
 
@@ -82,18 +86,30 @@ func createRegion(ctx *echo.Context, req *models.RegionRequest) (*models.Region,
 	return &region, nil
 }
 
-func updateRegion(ctx *echo.Context, regionID string, req *models.RegionRequest, existingRegion *models.Region) (*models.Region, error) {
+func updateRegion(ctx *echo.Context, regionID string, req *models.RegionRequest, region *models.Region) (*models.Region, error) {
 	repository := repository.GetRegionRepository()
 
-	region := *existingRegion
+	if region == nil {
+		r, err := repository.GetRegion(ctx, regionID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, exceptions.NewErrNotFound(fmt.Sprintf("region with id %s not found", regionID))
+			}
+			return nil, err
+		}
+		region = r
+	}
 	region.RegionRequest = *req
 
-	if err := repository.UpdateRegion(ctx, &region); err != nil {
+	if err := repository.PutRegion(ctx, region); err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, exceptions.NewErrUniqueField(fmt.Sprintf("region with name %s already exists", region.Name))
+		}
 		return nil, err
 	}
 
 	logger.Action(ctx, "update_region", "regionID", region.ID)
-	return &region, nil
+	return region, nil
 }
 
 func deleteRegion(ctx *echo.Context, id string) error {

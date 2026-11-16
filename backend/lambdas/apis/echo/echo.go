@@ -9,6 +9,7 @@ import (
 	"apis/middleware"
 	"apis/responses"
 	"apis/routes"
+	"apis/utils"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
@@ -32,7 +33,7 @@ func (sv *structValidator) Validate(i any) error {
 
 	errors := make([]string, 0)
 	for _, fe := range verrs {
-		errors = append(errors, fmt.Sprintf("'%s' %s", fe.Field(), describe(fe)))
+		errors = append(errors, fmt.Sprintf("'%s' %s", utils.ToCamelCase(fe.Field()), describe(fe)))
 	}
 
 	return &exceptions.ErrValidation{Errors: errors}

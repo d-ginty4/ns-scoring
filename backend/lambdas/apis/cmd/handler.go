@@ -8,6 +8,7 @@ import (
 
 	e "apis/echo"
 	"apis/logger"
+	"apis/repository"
 	"apis/responses"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -43,6 +44,7 @@ func Entry(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIG
 		}, err
 	}
 
+	repository.ConnectDB()
 	rec := new(ResponseWriter)
 	echoInstance.ServeHTTP(rec, httpReq)
 

@@ -11,7 +11,7 @@ import (
 
 var db *gorm.DB
 
-func connectDB() {
+func ConnectDB() {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		os.Getenv("DB_HOST"),
@@ -22,7 +22,7 @@ func connectDB() {
 		os.Getenv("DB_SSLMODE"),
 	)
 
-	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{TranslateError: true})
 	if err != nil {
 		panic(fmt.Sprintf("cant connect to db: %s", err))
 	}

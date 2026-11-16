@@ -8,8 +8,7 @@ import (
 
 type RegionRepository struct {
 	QueryRegions func(ctx *echo.Context) (*[]models.Region, error)
-	CreateRegion func(ctx *echo.Context, region *models.Region) error
-	UpdateRegion func(ctx *echo.Context, region *models.Region) error
+	PutRegion    func(ctx *echo.Context, region *models.Region) error
 	GetRegion    func(ctx *echo.Context, regionID string) (*models.Region, error)
 	DeleteRegion func(ctx *echo.Context, regionID string) error
 }
@@ -27,8 +26,7 @@ func GetRegionRepository() *RegionRepository {
 func newRegionRepository() *RegionRepository {
 	repository := &RegionRepository{
 		QueryRegions: queryRegions,
-		CreateRegion: createRegion,
-		UpdateRegion: updateRegion,
+		PutRegion:    putRegion,
 		GetRegion:    getRegion,
 		DeleteRegion: deleteRegion,
 	}
@@ -39,37 +37,36 @@ func newRegionRepository() *RegionRepository {
 
 func queryRegions(ctx *echo.Context) (*[]models.Region, error) {
 	if db == nil {
-		connectDB()
+		ConnectDB()
 	}
 	var regions []models.Region
 	return &regions, (db.Find(&regions)).Error
 }
 
-func createRegion(ctx *echo.Context, region *models.Region) error {
-	if db == nil {
-		connectDB()
-	}
-	return (db.Create(region)).Error
-}
-
-func updateRegion(ctx *echo.Context, region *models.Region) error {
-	if db == nil {
-		connectDB()
-	}
-	return nil
-}
-
 func getRegion(ctx *echo.Context, regionID string) (*models.Region, error) {
 	if db == nil {
-		connectDB()
+		ConnectDB()
 	}
+
 	var region models.Region
-	return &region, (db.First(&region, regionID)).Error
+	result := db.First(&region, regionID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &region, nil
+}
+
+func putRegion(ctx *echo.Context, region *models.Region) error {
+	if db == nil {
+		ConnectDB()
+	}
+	return db.Save(region).Error
 }
 
 func deleteRegion(ctx *echo.Context, regionID string) error {
 	if db == nil {
-		connectDB()
+		ConnectDB()
 	}
-	return (db.Delete(&models.Region{}, regionID)).Error
+	return (db.Unscoped().Delete(&models.Region{}, regionID)).Error
 }

@@ -4,16 +4,14 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
-
-	"gorm.io/gorm"
 )
 
 type RegionRequest struct {
-	Name string
+	Name string `json:"name" gorm:"unique;not null" validate:"required"`
 }
 
 type Region struct {
-	gorm.Model
+	Common
 	RegionRequest
 }
 

@@ -5,6 +5,7 @@ import (
 
 	e "apis/echo"
 	"apis/logger"
+	"apis/repository"
 
 	"github.com/joho/godotenv"
 )
@@ -16,6 +17,7 @@ func Handler() {
 	}
 
 	echoInstance := e.NewEchoInstance()
+	repository.ConnectDB()
 
 	slog.Info("starting local server", "addr", ":3000")
 	if err := echoInstance.Start(":3000"); err != nil {
