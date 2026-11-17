@@ -59,7 +59,7 @@ func getRegion(ctx *echo.Context, id string) (*models.Region, error) {
 	region, err := regionRepository.GetRegion(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, exceptions.NewErrNotFound(fmt.Sprintf("Region with id %s not found", id))
+			return nil, exceptions.NewErrNotFound(fmt.Sprintf("region with id %s not found", id))
 		}
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func createRegion(ctx *echo.Context, req *models.RegionRequest) (*models.Region,
 
 	if err := repository.PutRegion(ctx, &region); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return nil, exceptions.NewErrUniqueField(fmt.Sprintf("region with name %s already exists", region.Name))
+			return nil, exceptions.NewErrBadEntity(fmt.Sprintf("region with name %s already exists", region.Name))
 		}
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func updateRegion(ctx *echo.Context, regionID string, req *models.RegionRequest,
 
 	if err := repository.PutRegion(ctx, region); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return nil, exceptions.NewErrUniqueField(fmt.Sprintf("region with name %s already exists", region.Name))
+			return nil, exceptions.NewErrBadEntity(fmt.Sprintf("region with name %s already exists", region.Name))
 		}
 		return nil, err
 	}

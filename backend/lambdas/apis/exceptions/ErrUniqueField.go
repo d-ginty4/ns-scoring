@@ -1,13 +1,13 @@
 package exceptions
 
-type ErrUniqueField struct {
+type ErrBadEntity struct {
 	Message string
 }
 
-func (e *ErrUniqueField) Error() string {
+func (e *ErrBadEntity) Error() string {
 	return e.Message
 }
 
-func NewErrUniqueField(message string) error {
-	return &ErrUniqueField{message}
+func NewErrBadEntity(message string) error {
+	return &ErrBadEntity{message}
 }

@@ -1,11 +1,9 @@
 package middleware
 
 import (
-	"errors"
 	"net/http"
 
-	"apis/exceptions"
-	"apis/repository"
+	"apis/service"
 
 	"github.com/labstack/echo/v5"
 )
@@ -17,13 +15,10 @@ func CheckDivisionExist(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, "Division ID is required")
 		}
 
-		r := repository.GetDivisionRepository()
-		division, err := r.GetDivision(ctx, id)
+		s := service.GetDivisionService()
+		division, err := s.GetDivision(ctx, id)
 		if err != nil {
-			if errors.Is(err, &exceptions.ErrNotFound{}) {
-				return echo.NewHTTPError(http.StatusNotFound, err.Error())
-			}
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return err
 		}
 
 		ctx.Set("division", division)

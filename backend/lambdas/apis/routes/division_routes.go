@@ -1,10 +1,8 @@
 package routes
 
 import (
-	"errors"
 	"net/http"
 
-	"apis/exceptions"
 	"apis/models"
 	"apis/responses"
 	"apis/service"
@@ -57,17 +55,12 @@ func queryDivisions(ctx *echo.Context) error {
 func postDivision(ctx *echo.Context) error {
 	service := service.GetDivisionService()
 
-	requestUser, ok := ctx.Get("requestUser").(*models.User)
-	if !ok || requestUser == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get request user")
-	}
-
 	var p models.DivisionRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
-	division, err := service.CreateDivision(ctx, &p, requestUser)
+	division, err := service.CreateDivision(ctx, &p)
 	if err != nil {
 		return err
 	}
@@ -76,20 +69,16 @@ func postDivision(ctx *echo.Context) error {
 }
 
 func getDivision(ctx *echo.Context) error {
-	divisionService := service.GetDivisionService()
-
-	id := ctx.Param("divisionID")
-
 	division, ok := ctx.Get("division").(*models.Division)
 	if ok && division != nil {
 		return responses.Success(ctx, http.StatusOK, division)
 	}
 
+	divisionService := service.GetDivisionService()
+	id := ctx.Param("divisionID")
+
 	division, err := divisionService.GetDivision(ctx, id)
 	if err != nil {
-		if errors.Is(err, &exceptions.ErrNotFound{}) {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
-		}
 		return err
 	}
 
@@ -99,18 +88,14 @@ func getDivision(ctx *echo.Context) error {
 func putDivision(ctx *echo.Context) error {
 	service := service.GetDivisionService()
 
-	existing, ok := ctx.Get("division").(*models.Division)
-	if !ok || existing == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get existing division")
-	}
-
 	var p models.DivisionRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
 	id := ctx.Param("divisionID")
-	division, err := service.UpdateDivision(ctx, id, &p, existing)
+	existingDivision, _ := ctx.Get("division").(*models.Division)
+	division, err := service.UpdateDivision(ctx, id, &p, existingDivision)
 	if err != nil {
 		return err
 	}
@@ -121,13 +106,8 @@ func putDivision(ctx *echo.Context) error {
 func deleteDivision(ctx *echo.Context) error {
 	service := service.GetDivisionService()
 
-	division, ok := ctx.Get("division").(*models.Division)
-	if !ok || division == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get division")
-	}
-
 	id := ctx.Param("divisionID")
-	if err := service.DeleteDivision(ctx, id, division); err != nil {
+	if err := service.DeleteDivision(ctx, id); err != nil {
 		return err
 	}
 

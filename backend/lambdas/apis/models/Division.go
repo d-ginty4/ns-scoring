@@ -4,17 +4,15 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
-
-	"gorm.io/gorm"
 )
 
 type DivisionRequest struct {
-	Name   string
-	Gender string
+	Name   string `json:"name" gorm:"not null;uniqueIndex:idx_divisions_name_gender" validate:"required"`
+	Gender string `json:"gender" gorm:"not null;uniqueIndex:idx_divisions_name_gender;check:chk_divisions_gender,gender IN ('male', 'female')" validate:"required,oneof=male female"`
 }
 
 type Division struct {
-	gorm.Model
+	Common
 	DivisionRequest
 }
 

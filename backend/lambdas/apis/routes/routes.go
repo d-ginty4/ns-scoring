@@ -21,6 +21,7 @@ import (
 // @description Type "Bearer" followed by a space and the JWT.
 func SetupRoutes(e *echo.Echo) {
 	regionRoutes := getRegionRoutes()
+	divisionRoutes := getDivisionRoutes()
 
 	// Swagger docs
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -36,6 +37,15 @@ func SetupRoutes(e *echo.Echo) {
 	regionGroupID.GET("", regionRoutes.GetRegion)
 	regionGroupID.PUT("", regionRoutes.PutRegion)
 	regionGroupID.DELETE("", regionRoutes.DeleteRegion)
+
+	// Division Routes (/api/v1/divisions)
+	divisionGroup := base.Group("/divisions")
+	divisionGroup.POST("", divisionRoutes.PostDivision)
+	divisionGroup.GET("", divisionRoutes.QueryDivisions)
+	divisionGroupID := divisionGroup.Group("/:divisionID", middleware.CheckDivisionExist)
+	divisionGroupID.GET("", divisionRoutes.GetDivision)
+	divisionGroupID.PUT("", divisionRoutes.PutDivision)
+	divisionGroupID.DELETE("", divisionRoutes.DeleteDivision)
 
 	// Special route to return all available routes
 	e.GET("/routes", func(c *echo.Context) error {

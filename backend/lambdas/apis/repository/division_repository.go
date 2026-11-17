@@ -36,17 +36,37 @@ func newDivisionRepository() *DivisionRepository {
 }
 
 func queryDivisions(ctx *echo.Context) (*[]models.Division, error) {
-	return &[]models.Division{}, nil
-}
-
-func putDivision(ctx *echo.Context, division *models.Division) error {
-	return nil
+	if db == nil {
+		ConnectDB()
+	}
+	var divisions []models.Division
+	return &divisions, (db.Find(&divisions)).Error
 }
 
 func getDivision(ctx *echo.Context, divisionID string) (*models.Division, error) {
-	return &models.Division{}, nil
+	if db == nil {
+		ConnectDB()
+	}
+
+	var division models.Division
+	result := db.First(&division, divisionID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &division, nil
+}
+
+func putDivision(ctx *echo.Context, division *models.Division) error {
+	if db == nil {
+		ConnectDB()
+	}
+	return db.Save(division).Error
 }
 
 func deleteDivision(ctx *echo.Context, divisionID string) error {
-	return nil
+	if db == nil {
+		ConnectDB()
+	}
+	return (db.Unscoped().Delete(&models.Division{}, divisionID)).Error
 }
