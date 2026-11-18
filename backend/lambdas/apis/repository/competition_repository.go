@@ -36,17 +36,40 @@ func newCompetitionRepository() *CompetitionRepository {
 }
 
 func queryCompetitions(ctx *echo.Context) (*[]models.Competition, error) {
-	return &[]models.Competition{}, nil
+	if db == nil {
+		ConnectDB()
+	}
+	var competitions []models.Competition
+	return &competitions, db.Preload("Region").Find(&competitions).Error
 }
 
 func putCompetition(ctx *echo.Context, competition *models.Competition) error {
-	return nil
+	if db == nil {
+		ConnectDB()
+	}
+	if err := db.Omit("Region").Save(competition).Error; err != nil {
+		return err
+	}
+	return db.Preload("Region").First(competition, competition.ID).Error
 }
 
 func getCompetition(ctx *echo.Context, competitionID string) (*models.Competition, error) {
-	return &models.Competition{}, nil
+	if db == nil {
+		ConnectDB()
+	}
+
+	var competition models.Competition
+	result := db.Preload("Region").First(&competition, competitionID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &competition, nil
 }
 
 func deleteCompetition(ctx *echo.Context, competitionID string) error {
-	return nil
+	if db == nil {
+		ConnectDB()
+	}
+	return (db.Unscoped().Delete(&models.Competition{}, competitionID)).Error
 }

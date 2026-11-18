@@ -22,6 +22,7 @@ import (
 func SetupRoutes(e *echo.Echo) {
 	regionRoutes := getRegionRoutes()
 	divisionRoutes := getDivisionRoutes()
+	competitionRoutes := getCompetitionRoutes()
 
 	// Swagger docs
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -46,6 +47,15 @@ func SetupRoutes(e *echo.Echo) {
 	divisionGroupID.GET("", divisionRoutes.GetDivision)
 	divisionGroupID.PUT("", divisionRoutes.PutDivision)
 	divisionGroupID.DELETE("", divisionRoutes.DeleteDivision)
+
+	// Competition Routes (/api/v1/competitions)
+	competitionGroup := base.Group("/competitions")
+	competitionGroup.POST("", competitionRoutes.PostCompetition)
+	competitionGroup.GET("", competitionRoutes.QueryCompetitions)
+	competitionGroupID := competitionGroup.Group("/:competitionID", middleware.CheckCompetitionExist)
+	competitionGroupID.GET("", competitionRoutes.GetCompetition)
+	competitionGroupID.PUT("", competitionRoutes.PutCompetition)
+	competitionGroupID.DELETE("", competitionRoutes.DeleteCompetition)
 
 	// Special route to return all available routes
 	e.GET("/routes", func(c *echo.Context) error {

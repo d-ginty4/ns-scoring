@@ -37,5 +37,9 @@ func ToCamelCase(s string) string {
 		result.WriteString(word)
 	}
 
+	if strings.Contains(result.String(), "id") {
+		strings.Replace(result.String(), "id", "Id", 1)
+	}
+
 	return result.String()
 }

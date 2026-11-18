@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
-
-	"gorm.io/gorm"
 )
 
 type CompetitionRequest struct {
-	Name     string
-	Country  string
-	IconName string
+	Name     string `json:"name" gorm:"not null" validate:"required"`
+	Country  string `json:"country" gorm:"not null" validate:"required"`
+	IconName string `json:"iconName"`
+	RegionID uint   `json:"regionId" gorm:"not null;index" validate:"required"`
 }
 
 type Competition struct {
-	gorm.Model
+	Common
 	CompetitionRequest
+	Region Region `json:"region" gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 func (c *Competition) String() string {

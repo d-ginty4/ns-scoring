@@ -1,10 +1,8 @@
 package routes
 
 import (
-	"errors"
 	"net/http"
 
-	"apis/exceptions"
 	"apis/models"
 	"apis/responses"
 	"apis/service"
@@ -57,17 +55,12 @@ func queryCompetitions(ctx *echo.Context) error {
 func postCompetition(ctx *echo.Context) error {
 	service := service.GetCompetitionService()
 
-	requestUser, ok := ctx.Get("requestUser").(*models.User)
-	if !ok || requestUser == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get request user")
-	}
-
 	var p models.CompetitionRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
-	competition, err := service.CreateCompetition(ctx, &p, requestUser)
+	competition, err := service.CreateCompetition(ctx, &p)
 	if err != nil {
 		return err
 	}
@@ -76,20 +69,16 @@ func postCompetition(ctx *echo.Context) error {
 }
 
 func getCompetition(ctx *echo.Context) error {
-	competitionService := service.GetCompetitionService()
-
-	id := ctx.Param("competitionID")
-
 	competition, ok := ctx.Get("competition").(*models.Competition)
 	if ok && competition != nil {
 		return responses.Success(ctx, http.StatusOK, competition)
 	}
 
+	competitionService := service.GetCompetitionService()
+	id := ctx.Param("competitionID")
+
 	competition, err := competitionService.GetCompetition(ctx, id)
 	if err != nil {
-		if errors.Is(err, &exceptions.ErrNotFound{}) {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
-		}
 		return err
 	}
 
@@ -99,18 +88,14 @@ func getCompetition(ctx *echo.Context) error {
 func putCompetition(ctx *echo.Context) error {
 	service := service.GetCompetitionService()
 
-	existing, ok := ctx.Get("competition").(*models.Competition)
-	if !ok || existing == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get existing competition")
-	}
-
 	var p models.CompetitionRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
 	id := ctx.Param("competitionID")
-	competition, err := service.UpdateCompetition(ctx, id, &p, existing)
+	existingCompetition, _ := ctx.Get("competition").(*models.Competition)
+	competition, err := service.UpdateCompetition(ctx, id, &p, existingCompetition)
 	if err != nil {
 		return err
 	}
@@ -121,13 +106,8 @@ func putCompetition(ctx *echo.Context) error {
 func deleteCompetition(ctx *echo.Context) error {
 	service := service.GetCompetitionService()
 
-	competition, ok := ctx.Get("competition").(*models.Competition)
-	if !ok || competition == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get competition")
-	}
-
 	id := ctx.Param("competitionID")
-	if err := service.DeleteCompetition(ctx, id, competition); err != nil {
+	if err := service.DeleteCompetition(ctx, id); err != nil {
 		return err
 	}
 

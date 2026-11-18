@@ -27,7 +27,11 @@ func ConnectDB() {
 		panic(fmt.Sprintf("cant connect to db: %s", err))
 	}
 
-	database.AutoMigrate(&models.Region{}, &models.Division{})
+	database.AutoMigrate(
+		&models.Region{},
+		&models.Division{},
+		&models.Competition{},
+	)
 
 	db = database
 }

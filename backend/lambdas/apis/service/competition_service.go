@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"apis/exceptions"
@@ -9,14 +10,15 @@ import (
 	"apis/repository"
 
 	"github.com/labstack/echo/v5"
+	"gorm.io/gorm"
 )
 
 type CompetitionService struct {
 	QueryCompetitions func(ctx *echo.Context) (*[]models.Competition, error)
-	CreateCompetition func(ctx *echo.Context, req *models.CompetitionRequest, requestUser *models.User) (*models.Competition, error)
+	CreateCompetition func(ctx *echo.Context, req *models.CompetitionRequest) (*models.Competition, error)
 	GetCompetition    func(ctx *echo.Context, id string) (*models.Competition, error)
-	UpdateCompetition func(ctx *echo.Context, compeitionID string, req *models.CompetitionRequest, existingCompetition *models.Competition) (*models.Competition, error)
-	DeleteCompetition func(ctx *echo.Context, id string, existingCompetition *models.Competition) error
+	UpdateCompetition func(ctx *echo.Context, competitionID string, req *models.CompetitionRequest, existingCompetition *models.Competition) (*models.Competition, error)
+	DeleteCompetition func(ctx *echo.Context, id string) error
 }
 
 var competitionService *CompetitionService
@@ -56,18 +58,17 @@ func getCompetition(ctx *echo.Context, id string) (*models.Competition, error) {
 
 	competition, err := competitionRepository.GetCompetition(ctx, id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, exceptions.NewErrNotFound(fmt.Sprintf("competition with id %s not found", id))
+		}
 		return nil, err
-	}
-
-	if competition == nil {
-		return nil, exceptions.NewErrNotFound(fmt.Sprintf("Competition with id %s not found", id))
 	}
 
 	logger.Action(ctx, "get_competition", "competitionID", competition.ID)
 	return competition, nil
 }
 
-func createCompetition(ctx *echo.Context, req *models.CompetitionRequest, requestUser *models.User) (*models.Competition, error) {
+func createCompetition(ctx *echo.Context, req *models.CompetitionRequest) (*models.Competition, error) {
 	repository := repository.GetCompetitionRepository()
 
 	competition := models.Competition{
@@ -75,6 +76,9 @@ func createCompetition(ctx *echo.Context, req *models.CompetitionRequest, reques
 	}
 
 	if err := repository.PutCompetition(ctx, &competition); err != nil {
+		if errors.Is(err, gorm.ErrForeignKeyViolated) {
+			return nil, exceptions.NewErrBadEntity(fmt.Sprintf("region with id %d does not exist", competition.RegionID))
+		}
 		return nil, err
 	}
 
@@ -82,21 +86,33 @@ func createCompetition(ctx *echo.Context, req *models.CompetitionRequest, reques
 	return &competition, nil
 }
 
-func updateCompetition(ctx *echo.Context, competitionID string, req *models.CompetitionRequest, existingCompetition *models.Competition) (*models.Competition, error) {
+func updateCompetition(ctx *echo.Context, competitionID string, req *models.CompetitionRequest, competition *models.Competition) (*models.Competition, error) {
 	repository := repository.GetCompetitionRepository()
 
-	competition := *existingCompetition
+	if competition == nil {
+		c, err := repository.GetCompetition(ctx, competitionID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, exceptions.NewErrNotFound(fmt.Sprintf("competition with id %s not found", competitionID))
+			}
+			return nil, err
+		}
+		competition = c
+	}
 	competition.CompetitionRequest = *req
 
-	if err := repository.PutCompetition(ctx, &competition); err != nil {
+	if err := repository.PutCompetition(ctx, competition); err != nil {
+		if errors.Is(err, gorm.ErrForeignKeyViolated) {
+			return nil, exceptions.NewErrBadEntity(fmt.Sprintf("region with id %d does not exist", competition.RegionID))
+		}
 		return nil, err
 	}
 
 	logger.Action(ctx, "update_competition", "competitionID", competition.ID)
-	return &competition, nil
+	return competition, nil
 }
 
-func deleteCompetition(ctx *echo.Context, id string, existingCompetition *models.Competition) error {
+func deleteCompetition(ctx *echo.Context, id string) error {
 	competitionRepository := repository.GetCompetitionRepository()
 
 	if err := competitionRepository.DeleteCompetition(ctx, id); err != nil {
