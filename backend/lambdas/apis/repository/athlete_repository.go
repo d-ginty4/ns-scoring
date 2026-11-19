@@ -7,10 +7,10 @@ import (
 )
 
 type AthleteRepository struct {
-	QueryAthletes func(ctx *echo.Context) (*[]models.Athlete, error)
+	QueryAthletes func(ctx *echo.Context, competitionID string) (*[]models.Athlete, error)
 	PutAthlete    func(ctx *echo.Context, athlete *models.Athlete) error
-	GetAthlete    func(ctx *echo.Context, athleteID string) (*models.Athlete, error)
-	DeleteAthlete func(ctx *echo.Context, athleteID string) error
+	GetAthlete    func(ctx *echo.Context, competitionID string, athleteID string) (*models.Athlete, error)
+	DeleteAthlete func(ctx *echo.Context, competitionID string, athleteID string) error
 }
 
 var athleteRepository *AthleteRepository
@@ -35,18 +35,41 @@ func newAthleteRepository() *AthleteRepository {
 	return repository
 }
 
-func queryAthletes(ctx *echo.Context) (*[]models.Athlete, error) {
-	return &[]models.Athlete{}, nil
+func queryAthletes(ctx *echo.Context, competitionID string) (*[]models.Athlete, error) {
+	if db == nil {
+		ConnectDB()
+	}
+	var athletes []models.Athlete
+	return &athletes, db.Preload("Competition.Region").Preload("Division").Where("competition_id = ?", competitionID).Find(&athletes).Error
 }
 
 func putAthlete(ctx *echo.Context, athlete *models.Athlete) error {
-	return nil
+	if db == nil {
+		ConnectDB()
+	}
+	if err := db.Omit("Competition", "Division").Save(athlete).Error; err != nil {
+		return err
+	}
+	return db.Preload("Competition.Region").Preload("Division").First(athlete, athlete.ID).Error
 }
 
-func getAthlete(ctx *echo.Context, athleteID string) (*models.Athlete, error) {
-	return &models.Athlete{}, nil
+func getAthlete(ctx *echo.Context, competitionID string, athleteID string) (*models.Athlete, error) {
+	if db == nil {
+		ConnectDB()
+	}
+
+	var athlete models.Athlete
+	result := db.Preload("Competition.Region").Preload("Division").Where("competition_id = ?", competitionID).First(&athlete, athleteID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &athlete, nil
 }
 
-func deleteAthlete(ctx *echo.Context, athleteID string) error {
-	return nil
+func deleteAthlete(ctx *echo.Context, competitionID string, athleteID string) error {
+	if db == nil {
+		ConnectDB()
+	}
+	return db.Unscoped().Where("competition_id = ?", competitionID).Delete(&models.Athlete{}, athleteID).Error
 }

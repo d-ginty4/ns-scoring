@@ -36,17 +36,37 @@ func newEventRepository() *EventRepository {
 }
 
 func queryEvents(ctx *echo.Context) (*[]models.Event, error) {
-	return &[]models.Event{}, nil
-}
-
-func putEvent(ctx *echo.Context, event *models.Event) error {
-	return nil
+	if db == nil {
+		ConnectDB()
+	}
+	var events []models.Event
+	return &events, (db.Find(&events)).Error
 }
 
 func getEvent(ctx *echo.Context, eventID string) (*models.Event, error) {
-	return &models.Event{}, nil
+	if db == nil {
+		ConnectDB()
+	}
+
+	var event models.Event
+	result := db.First(&event, eventID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &event, nil
+}
+
+func putEvent(ctx *echo.Context, event *models.Event) error {
+	if db == nil {
+		ConnectDB()
+	}
+	return db.Save(event).Error
 }
 
 func deleteEvent(ctx *echo.Context, eventID string) error {
-	return nil
+	if db == nil {
+		ConnectDB()
+	}
+	return (db.Unscoped().Delete(&models.Event{}, eventID)).Error
 }

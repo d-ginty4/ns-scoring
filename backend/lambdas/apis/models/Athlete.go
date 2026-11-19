@@ -4,18 +4,20 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
-
-	"gorm.io/gorm"
 )
 
 type AthleteRequest struct {
-	Name    string
-	Country string
+	Name       string `json:"name" gorm:"not null" validate:"required"`
+	Country    string `json:"country" gorm:"not null" validate:"required"`
+	DivisionID uint   `json:"divisionId" gorm:"not null;index" validate:"required"`
 }
 
 type Athlete struct {
-	gorm.Model
+	Common
 	AthleteRequest
+	CompetitionID uint        `json:"competitionId" gorm:"not null;index"`
+	Competition   Competition `json:"competition" gorm:"foreignKey:CompetitionID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Division      Division    `json:"division" gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 func (a *Athlete) String() string {

@@ -1,10 +1,8 @@
 package routes
 
 import (
-	"errors"
 	"net/http"
 
-	"apis/exceptions"
 	"apis/models"
 	"apis/responses"
 	"apis/service"
@@ -46,7 +44,7 @@ func newAthleteRoutes() *AthleteRoutes {
 func queryAthletes(ctx *echo.Context) error {
 	service := service.GetAthleteService()
 
-	page, err := service.QueryAthletes(ctx)
+	page, err := service.QueryAthletes(ctx, ctx.Param("competitionID"))
 	if err != nil {
 		return err
 	}
@@ -57,17 +55,12 @@ func queryAthletes(ctx *echo.Context) error {
 func postAthlete(ctx *echo.Context) error {
 	service := service.GetAthleteService()
 
-	requestUser, ok := ctx.Get("requestUser").(*models.User)
-	if !ok || requestUser == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get request user")
-	}
-
 	var p models.AthleteRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
-	athlete, err := service.CreateAthlete(ctx, &p, requestUser)
+	athlete, err := service.CreateAthlete(ctx, ctx.Param("competitionID"), &p)
 	if err != nil {
 		return err
 	}
@@ -76,20 +69,14 @@ func postAthlete(ctx *echo.Context) error {
 }
 
 func getAthlete(ctx *echo.Context) error {
-	athleteService := service.GetAthleteService()
-
-	id := ctx.Param("athleteID")
-
 	athlete, ok := ctx.Get("athlete").(*models.Athlete)
 	if ok && athlete != nil {
 		return responses.Success(ctx, http.StatusOK, athlete)
 	}
 
-	athlete, err := athleteService.GetAthlete(ctx, id)
+	athleteService := service.GetAthleteService()
+	athlete, err := athleteService.GetAthlete(ctx, ctx.Param("competitionID"), ctx.Param("athleteID"))
 	if err != nil {
-		if errors.Is(err, &exceptions.ErrNotFound{}) {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
-		}
 		return err
 	}
 
@@ -99,18 +86,13 @@ func getAthlete(ctx *echo.Context) error {
 func putAthlete(ctx *echo.Context) error {
 	service := service.GetAthleteService()
 
-	existing, ok := ctx.Get("athlete").(*models.Athlete)
-	if !ok || existing == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get existing athlete")
-	}
-
 	var p models.AthleteRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
-	id := ctx.Param("athleteID")
-	athlete, err := service.UpdateAthlete(ctx, id, &p, existing)
+	existingAthlete, _ := ctx.Get("athlete").(*models.Athlete)
+	athlete, err := service.UpdateAthlete(ctx, ctx.Param("competitionID"), ctx.Param("athleteID"), &p, existingAthlete)
 	if err != nil {
 		return err
 	}
@@ -121,13 +103,7 @@ func putAthlete(ctx *echo.Context) error {
 func deleteAthlete(ctx *echo.Context) error {
 	service := service.GetAthleteService()
 
-	athlete, ok := ctx.Get("athlete").(*models.Athlete)
-	if !ok || athlete == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get athlete")
-	}
-
-	id := ctx.Param("athleteID")
-	if err := service.DeleteAthlete(ctx, id, athlete); err != nil {
+	if err := service.DeleteAthlete(ctx, ctx.Param("competitionID"), ctx.Param("athleteID")); err != nil {
 		return err
 	}
 

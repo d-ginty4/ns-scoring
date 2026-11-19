@@ -1,10 +1,8 @@
 package routes
 
 import (
-	"errors"
 	"net/http"
 
-	"apis/exceptions"
 	"apis/models"
 	"apis/responses"
 	"apis/service"
@@ -57,17 +55,12 @@ func queryEvents(ctx *echo.Context) error {
 func postEvent(ctx *echo.Context) error {
 	service := service.GetEventService()
 
-	requestUser, ok := ctx.Get("requestUser").(*models.User)
-	if !ok || requestUser == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get request user")
-	}
-
 	var p models.EventRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
-	event, err := service.CreateEvent(ctx, &p, requestUser)
+	event, err := service.CreateEvent(ctx, &p)
 	if err != nil {
 		return err
 	}
@@ -76,20 +69,16 @@ func postEvent(ctx *echo.Context) error {
 }
 
 func getEvent(ctx *echo.Context) error {
-	eventService := service.GetEventService()
-
-	id := ctx.Param("eventID")
-
 	event, ok := ctx.Get("event").(*models.Event)
 	if ok && event != nil {
 		return responses.Success(ctx, http.StatusOK, event)
 	}
 
+	eventService := service.GetEventService()
+	id := ctx.Param("eventID")
+
 	event, err := eventService.GetEvent(ctx, id)
 	if err != nil {
-		if errors.Is(err, &exceptions.ErrNotFound{}) {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
-		}
 		return err
 	}
 
@@ -99,18 +88,14 @@ func getEvent(ctx *echo.Context) error {
 func putEvent(ctx *echo.Context) error {
 	service := service.GetEventService()
 
-	existing, ok := ctx.Get("event").(*models.Event)
-	if !ok || existing == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get existing event")
-	}
-
 	var p models.EventRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
 	id := ctx.Param("eventID")
-	event, err := service.UpdateEvent(ctx, id, &p, existing)
+	existingEvent, _ := ctx.Get("event").(*models.Event)
+	event, err := service.UpdateEvent(ctx, id, &p, existingEvent)
 	if err != nil {
 		return err
 	}
@@ -121,13 +106,8 @@ func putEvent(ctx *echo.Context) error {
 func deleteEvent(ctx *echo.Context) error {
 	service := service.GetEventService()
 
-	event, ok := ctx.Get("event").(*models.Event)
-	if !ok || event == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get event")
-	}
-
 	id := ctx.Param("eventID")
-	if err := service.DeleteEvent(ctx, id, event); err != nil {
+	if err := service.DeleteEvent(ctx, id); err != nil {
 		return err
 	}
 

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"apis/exceptions"
@@ -9,14 +10,15 @@ import (
 	"apis/repository"
 
 	"github.com/labstack/echo/v5"
+	"gorm.io/gorm"
 )
 
 type EventService struct {
 	QueryEvents func(ctx *echo.Context) (*[]models.Event, error)
-	CreateEvent func(ctx *echo.Context, req *models.EventRequest, requestUser *models.User) (*models.Event, error)
+	CreateEvent func(ctx *echo.Context, req *models.EventRequest) (*models.Event, error)
 	GetEvent    func(ctx *echo.Context, id string) (*models.Event, error)
 	UpdateEvent func(ctx *echo.Context, eventID string, req *models.EventRequest, existingEvent *models.Event) (*models.Event, error)
-	DeleteEvent func(ctx *echo.Context, id string, existingEvent *models.Event) error
+	DeleteEvent func(ctx *echo.Context, id string) error
 }
 
 var eventService *EventService
@@ -56,18 +58,17 @@ func getEvent(ctx *echo.Context, id string) (*models.Event, error) {
 
 	event, err := eventRepository.GetEvent(ctx, id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, exceptions.NewErrNotFound(fmt.Sprintf("event with id %s not found", id))
+		}
 		return nil, err
-	}
-
-	if event == nil {
-		return nil, exceptions.NewErrNotFound(fmt.Sprintf("Event with id %s not found", id))
 	}
 
 	logger.Action(ctx, "get_event", "eventID", event.ID)
 	return event, nil
 }
 
-func createEvent(ctx *echo.Context, req *models.EventRequest, requestUser *models.User) (*models.Event, error) {
+func createEvent(ctx *echo.Context, req *models.EventRequest) (*models.Event, error) {
 	repository := repository.GetEventRepository()
 
 	event := models.Event{
@@ -75,6 +76,9 @@ func createEvent(ctx *echo.Context, req *models.EventRequest, requestUser *model
 	}
 
 	if err := repository.PutEvent(ctx, &event); err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, exceptions.NewErrBadEntity(fmt.Sprintf("event with name %s already exists", event.Name))
+		}
 		return nil, err
 	}
 
@@ -82,21 +86,33 @@ func createEvent(ctx *echo.Context, req *models.EventRequest, requestUser *model
 	return &event, nil
 }
 
-func updateEvent(ctx *echo.Context, eventID string, req *models.EventRequest, existingEvent *models.Event) (*models.Event, error) {
+func updateEvent(ctx *echo.Context, eventID string, req *models.EventRequest, event *models.Event) (*models.Event, error) {
 	repository := repository.GetEventRepository()
 
-	event := *existingEvent
+	if event == nil {
+		e, err := repository.GetEvent(ctx, eventID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, exceptions.NewErrNotFound(fmt.Sprintf("event with id %s not found", eventID))
+			}
+			return nil, err
+		}
+		event = e
+	}
 	event.EventRequest = *req
 
-	if err := repository.PutEvent(ctx, &event); err != nil {
+	if err := repository.PutEvent(ctx, event); err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, exceptions.NewErrBadEntity(fmt.Sprintf("event with name %s already exists", event.Name))
+		}
 		return nil, err
 	}
 
 	logger.Action(ctx, "update_event", "eventID", event.ID)
-	return &event, nil
+	return event, nil
 }
 
-func deleteEvent(ctx *echo.Context, id string, existingEvent *models.Event) error {
+func deleteEvent(ctx *echo.Context, id string) error {
 	eventRepository := repository.GetEventRepository()
 
 	if err := eventRepository.DeleteEvent(ctx, id); err != nil {

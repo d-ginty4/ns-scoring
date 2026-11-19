@@ -4,20 +4,18 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
-
-	"gorm.io/gorm"
 )
 
 type EventRequest struct {
-	Name               string
-	EventNumber        int
-	WeightOptionMens   []int
-	WeightOptionWomens []int
-	ScoringMethod      string
+	Name               string `json:"name" gorm:"unique;not null" validate:"required"`
+	EventNumber        int    `json:"eventNumber" gorm:"not null" validate:"required"`
+	WeightOptionsMen   []int  `json:"weightOptionsMen" gorm:"type:jsonb;serializer:json;not null" validate:"required"`
+	WeightOptionsWomen []int  `json:"weightOptionsWomen" gorm:"type:jsonb;serializer:json;not null" validate:"required"`
+	ScoringMethod      string `json:"scoringMethod" gorm:"not null" validate:"required"`
 }
 
 type Event struct {
-	gorm.Model
+	Common
 	EventRequest
 }
 

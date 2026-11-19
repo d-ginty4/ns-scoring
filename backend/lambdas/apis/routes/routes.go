@@ -23,6 +23,8 @@ func SetupRoutes(e *echo.Echo) {
 	regionRoutes := getRegionRoutes()
 	divisionRoutes := getDivisionRoutes()
 	competitionRoutes := getCompetitionRoutes()
+	athleteRoutes := getAthleteRoutes()
+	eventRoutes := getEventRoutes()
 
 	// Swagger docs
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -56,6 +58,23 @@ func SetupRoutes(e *echo.Echo) {
 	competitionGroupID.GET("", competitionRoutes.GetCompetition)
 	competitionGroupID.PUT("", competitionRoutes.PutCompetition)
 	competitionGroupID.DELETE("", competitionRoutes.DeleteCompetition)
+
+	// Event Routes (/api/v1/events)
+	eventGroup := base.Group("/events")
+	eventGroup.POST("", eventRoutes.PostEvent)
+	eventGroup.GET("", eventRoutes.QueryEvents)
+	eventGroupID := eventGroup.Group("/:eventID", middleware.CheckEventExist)
+	eventGroupID.GET("", eventRoutes.GetEvent)
+	eventGroupID.PUT("", eventRoutes.PutEvent)
+	eventGroupID.DELETE("", eventRoutes.DeleteEvent)
+
+	// Athlete Routes (/api/v1/competitions/:competitionID/athletes)
+	competitionGroupID.POST("/athletes", athleteRoutes.PostAthlete)
+	competitionGroupID.GET("/athletes", athleteRoutes.QueryAthletes)
+	athleteGroupID := competitionGroupID.Group("/athletes/:athleteID", middleware.CheckAthleteExist)
+	athleteGroupID.GET("", athleteRoutes.GetAthlete)
+	athleteGroupID.PUT("", athleteRoutes.PutAthlete)
+	athleteGroupID.DELETE("", athleteRoutes.DeleteAthlete)
 
 	// Special route to return all available routes
 	e.GET("/routes", func(c *echo.Context) error {

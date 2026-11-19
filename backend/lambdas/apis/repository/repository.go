@@ -31,6 +31,8 @@ func ConnectDB() {
 		&models.Region{},
 		&models.Division{},
 		&models.Competition{},
+		&models.Athlete{},
+		&models.Event{},
 	)
 
 	db = database
