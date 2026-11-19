@@ -4,19 +4,21 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
-
-	"gorm.io/gorm"
 )
 
 type ResultRequest struct {
-	Weight            int
-	Value             int
-	DidNotParticipate bool
+	Weight            int  `json:"weight" gorm:"not null" validate:"required"`
+	Value             int  `json:"value" gorm:"not null" validate:"required"`
+	DidNotParticipate bool `json:"didNotParticipate"`
 }
 
 type Result struct {
-	gorm.Model
+	Common
 	ResultRequest
+	EventId   uint    `json:"eventId" gorm:"not null;index"`
+	Event     Event   `json:"event" gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	AthleteId uint    `json:"athleteId" gorm:"not null;index"`
+	Athlete   Athlete `json:"athlete" gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 
 func (r *Result) String() string {

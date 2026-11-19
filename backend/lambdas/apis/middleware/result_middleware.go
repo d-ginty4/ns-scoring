@@ -1,29 +1,24 @@
 package middleware
 
 import (
-	"errors"
 	"net/http"
 
-	"apis/exceptions"
-	"apis/repository"
+	"apis/service"
 
 	"github.com/labstack/echo/v5"
 )
 
 func CheckResultExist(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx *echo.Context) error {
-		id := ctx.Param("resultID")
-		if id == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, "Result ID is required")
+		eventID := ctx.Param("eventID")
+		if eventID == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "Event ID is required")
 		}
 
-		r := repository.GetResultRepository()
-		result, err := r.GetResult(ctx, id)
+		s := service.GetResultService()
+		result, err := s.GetResult(ctx, ctx.Param("athleteID"), eventID)
 		if err != nil {
-			if errors.Is(err, &exceptions.ErrNotFound{}) {
-				return echo.NewHTTPError(http.StatusNotFound, err.Error())
-			}
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return err
 		}
 
 		ctx.Set("result", result)

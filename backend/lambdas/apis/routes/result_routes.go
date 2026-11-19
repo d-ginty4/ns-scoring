@@ -1,10 +1,8 @@
 package routes
 
 import (
-	"errors"
 	"net/http"
 
-	"apis/exceptions"
 	"apis/models"
 	"apis/responses"
 	"apis/service"
@@ -46,7 +44,7 @@ func newResultRoutes() *ResultRoutes {
 func queryResults(ctx *echo.Context) error {
 	service := service.GetResultService()
 
-	page, err := service.QueryResults(ctx)
+	page, err := service.QueryResults(ctx, ctx.Param("athleteID"))
 	if err != nil {
 		return err
 	}
@@ -57,17 +55,12 @@ func queryResults(ctx *echo.Context) error {
 func postResult(ctx *echo.Context) error {
 	service := service.GetResultService()
 
-	requestUser, ok := ctx.Get("requestUser").(*models.User)
-	if !ok || requestUser == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get request user")
-	}
-
 	var p models.ResultRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
-	result, err := service.CreateResult(ctx, &p, requestUser)
+	result, err := service.CreateResult(ctx, ctx.Param("athleteID"), ctx.Param("eventID"), &p)
 	if err != nil {
 		return err
 	}
@@ -76,20 +69,14 @@ func postResult(ctx *echo.Context) error {
 }
 
 func getResult(ctx *echo.Context) error {
-	resultService := service.GetResultService()
-
-	id := ctx.Param("resultID")
-
 	result, ok := ctx.Get("result").(*models.Result)
 	if ok && result != nil {
 		return responses.Success(ctx, http.StatusOK, result)
 	}
 
-	result, err := resultService.GetResult(ctx, id)
+	resultService := service.GetResultService()
+	result, err := resultService.GetResult(ctx, ctx.Param("athleteID"), ctx.Param("eventID"))
 	if err != nil {
-		if errors.Is(err, &exceptions.ErrNotFound{}) {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
-		}
 		return err
 	}
 
@@ -99,18 +86,13 @@ func getResult(ctx *echo.Context) error {
 func putResult(ctx *echo.Context) error {
 	service := service.GetResultService()
 
-	existing, ok := ctx.Get("result").(*models.Result)
-	if !ok || existing == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get existing result")
-	}
-
 	var p models.ResultRequest
 	if err := utils.BindAndValidate(ctx, &p); err != nil {
 		return err
 	}
 
-	id := ctx.Param("resultID")
-	result, err := service.UpdateResult(ctx, id, &p, existing)
+	existingResult, _ := ctx.Get("result").(*models.Result)
+	result, err := service.UpdateResult(ctx, ctx.Param("athleteID"), ctx.Param("eventID"), &p, existingResult)
 	if err != nil {
 		return err
 	}
@@ -121,13 +103,7 @@ func putResult(ctx *echo.Context) error {
 func deleteResult(ctx *echo.Context) error {
 	service := service.GetResultService()
 
-	result, ok := ctx.Get("result").(*models.Result)
-	if !ok || result == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get result")
-	}
-
-	id := ctx.Param("resultID")
-	if err := service.DeleteResult(ctx, id, result); err != nil {
+	if err := service.DeleteResult(ctx, ctx.Param("athleteID"), ctx.Param("eventID")); err != nil {
 		return err
 	}
 

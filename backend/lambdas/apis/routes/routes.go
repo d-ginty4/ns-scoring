@@ -25,6 +25,7 @@ func SetupRoutes(e *echo.Echo) {
 	competitionRoutes := getCompetitionRoutes()
 	athleteRoutes := getAthleteRoutes()
 	eventRoutes := getEventRoutes()
+	resultRoutes := getResultRoutes()
 
 	// Swagger docs
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -75,6 +76,15 @@ func SetupRoutes(e *echo.Echo) {
 	athleteGroupID.GET("", athleteRoutes.GetAthlete)
 	athleteGroupID.PUT("", athleteRoutes.PutAthlete)
 	athleteGroupID.DELETE("", athleteRoutes.DeleteAthlete)
+
+	// Result Routes (/api/v1/results)
+	resultGroup := base.Group("/results")
+	resultGroup.GET("/:athleteID", resultRoutes.QueryResults)
+	resultEventGroup := resultGroup.Group("/:athleteID/:eventID", middleware.CheckEventExist)
+	resultEventGroup.POST("", resultRoutes.PostResult)
+	resultEventGroup.GET("", resultRoutes.GetResult, middleware.CheckResultExist)
+	resultEventGroup.PUT("", resultRoutes.PutResult, middleware.CheckResultExist)
+	resultEventGroup.DELETE("", resultRoutes.DeleteResult, middleware.CheckResultExist)
 
 	// Special route to return all available routes
 	e.GET("/routes", func(c *echo.Context) error {
