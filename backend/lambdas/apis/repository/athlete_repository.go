@@ -7,10 +7,11 @@ import (
 )
 
 type AthleteRepository struct {
-	QueryAthletes func(ctx *echo.Context, competitionID string) (*[]models.Athlete, error)
-	PutAthlete    func(ctx *echo.Context, athlete *models.Athlete) error
-	GetAthlete    func(ctx *echo.Context, competitionID string, athleteID string) (*models.Athlete, error)
-	DeleteAthlete func(ctx *echo.Context, competitionID string, athleteID string) error
+	QueryAthletes  func(ctx *echo.Context, competitionID string) (*[]models.Athlete, error)
+	PutAthlete     func(ctx *echo.Context, athlete *models.Athlete) error
+	GetAthlete     func(ctx *echo.Context, competitionID string, athleteID string) (*models.Athlete, error)
+	GetAthleteByID func(ctx *echo.Context, athleteID string) (*models.Athlete, error)
+	DeleteAthlete  func(ctx *echo.Context, competitionID string, athleteID string) error
 }
 
 var athleteRepository *AthleteRepository
@@ -25,10 +26,11 @@ func GetAthleteRepository() *AthleteRepository {
 
 func newAthleteRepository() *AthleteRepository {
 	repository := &AthleteRepository{
-		QueryAthletes: queryAthletes,
-		PutAthlete:    putAthlete,
-		GetAthlete:    getAthlete,
-		DeleteAthlete: deleteAthlete,
+		QueryAthletes:  queryAthletes,
+		PutAthlete:     putAthlete,
+		GetAthlete:     getAthlete,
+		GetAthleteByID: getAthleteByID,
+		DeleteAthlete:  deleteAthlete,
 	}
 
 	athleteRepository = repository
@@ -60,6 +62,20 @@ func getAthlete(ctx *echo.Context, competitionID string, athleteID string) (*mod
 
 	var athlete models.Athlete
 	result := db.Preload("Competition.Region").Preload("Division").Where("competition_id = ?", competitionID).First(&athlete, athleteID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &athlete, nil
+}
+
+func getAthleteByID(ctx *echo.Context, athleteID string) (*models.Athlete, error) {
+	if db == nil {
+		ConnectDB()
+	}
+
+	var athlete models.Athlete
+	result := db.First(&athlete, athleteID)
 	if result.Error != nil {
 		return nil, result.Error
 	}

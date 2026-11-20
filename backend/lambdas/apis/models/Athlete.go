@@ -9,13 +9,13 @@ import (
 type AthleteRequest struct {
 	Name       string `json:"name" gorm:"not null" validate:"required"`
 	Country    string `json:"country" gorm:"not null" validate:"required"`
-	DivisionID uint   `json:"divisionId" gorm:"not null;index" validate:"required"`
+	DivisionID uint   `json:"divisionId" gorm:"not null;index" validate:"required,divisionExists"`
 }
 
 type Athlete struct {
 	Common
 	AthleteRequest
-	CompetitionID uint        `json:"competitionId" gorm:"not null;index"`
+	CompetitionID uint        `json:"competitionId" gorm:"not null;index" validate:"required,competitionExists"`
 	Competition   Competition `json:"competition" gorm:"foreignKey:CompetitionID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	Division      Division    `json:"division" gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }

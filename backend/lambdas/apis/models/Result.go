@@ -15,9 +15,9 @@ type ResultRequest struct {
 type Result struct {
 	Common
 	ResultRequest
-	EventId   uint    `json:"eventId" gorm:"not null;index"`
+	EventId   uint    `json:"eventId" gorm:"not null;index" validate:"required,eventExists"`
 	Event     Event   `json:"event" gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
-	AthleteId uint    `json:"athleteId" gorm:"not null;index"`
+	AthleteId uint    `json:"athleteId" gorm:"not null;index" validate:"required,athleteExists"`
 	Athlete   Athlete `json:"athlete" gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 }
 

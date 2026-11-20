@@ -3,13 +3,15 @@ package echo
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"strings"
 
 	"apis/exceptions"
 	"apis/logger"
 	"apis/middleware"
 	"apis/responses"
 	"apis/routes"
-	"apis/utils"
+	"apis/validators"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
@@ -33,7 +35,7 @@ func (sv *structValidator) Validate(i any) error {
 
 	errors := make([]string, 0)
 	for _, fe := range verrs {
-		errors = append(errors, fmt.Sprintf("'%s' %s", utils.ToCamelCase(fe.Field()), describe(fe)))
+		errors = append(errors, fmt.Sprintf("'%s' %s", fe.Field(), describe(fe)))
 	}
 
 	return &exceptions.ErrValidation{Errors: errors}
@@ -49,8 +51,8 @@ func describe(fe validator.FieldError) string {
 		return "must be at least " + fe.Param() + " characters"
 	case "max":
 		return "must be at most " + fe.Param() + " characters"
-	case "isCursor":
-		return "invalid cursor"
+	case "regionExists", "divisionExists", "competitionExists", "eventExists", "athleteExists":
+		return fmt.Sprintf("%v does not exist", fe.Value())
 	default:
 		return "is invalid"
 	}
@@ -58,6 +60,18 @@ func describe(fe validator.FieldError) string {
 
 func NewEchoInstance() *echo.Echo {
 	v := validator.New(validator.WithRequiredStructEnabled())
+	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
+	v.RegisterValidation("regionExists", validators.RegionExists)
+	v.RegisterValidation("divisionExists", validators.DivisionExists)
+	v.RegisterValidation("competitionExists", validators.CompetitionExists)
+	v.RegisterValidation("eventExists", validators.EventExists)
+	v.RegisterValidation("athleteExists", validators.AthleteExists)
 
 	e := echo.New()
 	e.Logger = logger.Logger()

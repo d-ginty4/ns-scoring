@@ -10,7 +10,7 @@ type CompetitionRequest struct {
 	Name     string `json:"name" gorm:"not null" validate:"required"`
 	Country  string `json:"country" gorm:"not null" validate:"required"`
 	IconName string `json:"iconName"`
-	RegionID uint   `json:"regionId" gorm:"not null;index" validate:"required"`
+	RegionID uint   `json:"regionId" gorm:"not null;index" validate:"required,regionExists"`
 }
 
 type Competition struct {

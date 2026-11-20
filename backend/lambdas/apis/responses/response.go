@@ -30,6 +30,10 @@ func Success(c *echo.Context, statusCode int, data any) error {
 	if id != "" {
 		c.Response().Header().Set(echo.HeaderXRequestID, id)
 	}
+	data, err := omitLoadedRelationIDs(data)
+	if err != nil {
+		return err
+	}
 	return write(c, statusCode, Envelope[any]{
 		RequestID: id,
 		Data:      data,
