@@ -41,6 +41,14 @@ func newCompetitionRoutes() *CompetitionRoutes {
 	return routes
 }
 
+// queryCompetitions lists competitions.
+//
+//	@Summary		List competitions
+//	@Tags			Competitions
+//	@Produce		json
+//	@Success		200	{object}	responses.Envelope[[]models.Competition]
+//	@Failure		500	{object}	responses.Envelope[any]
+//	@Router			/v1/competitions [get]
 func queryCompetitions(ctx *echo.Context) error {
 	service := service.GetCompetitionService()
 
@@ -52,6 +60,17 @@ func queryCompetitions(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, page)
 }
 
+// postCompetition creates a competition.
+//
+//	@Summary		Create competition
+//	@Tags			Competitions
+//	@Accept			json
+//	@Produce		json
+//	@Param			competition	body		models.CompetitionRequest	true	"Competition"
+//	@Success		200			{object}	responses.Envelope[models.Competition]
+//	@Failure		400			{object}	responses.Envelope[any]
+//	@Failure		500			{object}	responses.Envelope[any]
+//	@Router			/v1/competitions [post]
 func postCompetition(ctx *echo.Context) error {
 	service := service.GetCompetitionService()
 
@@ -68,6 +87,16 @@ func postCompetition(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, competition)
 }
 
+// getCompetition returns a competition.
+//
+//	@Summary		Get competition
+//	@Tags			Competitions
+//	@Produce		json
+//	@Param			competitionID	path		integer	true	"Competition ID"
+//	@Success		200				{object}	responses.Envelope[models.Competition]
+//	@Failure		404				{object}	responses.Envelope[any]
+//	@Failure		500				{object}	responses.Envelope[any]
+//	@Router			/v1/competitions/{competitionID} [get]
 func getCompetition(ctx *echo.Context) error {
 	competition, ok := ctx.Get("competition").(*models.Competition)
 	if ok && competition != nil {
@@ -85,6 +114,19 @@ func getCompetition(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, competition)
 }
 
+// putCompetition creates or updates a competition.
+//
+//	@Summary		Update competition
+//	@Tags			Competitions
+//	@Accept			json
+//	@Produce		json
+//	@Param			competitionID	path		integer							true	"Competition ID"
+//	@Param			competition		body		models.CompetitionRequest		true	"Competition"
+//	@Success		200				{object}	responses.Envelope[models.Competition]
+//	@Failure		400				{object}	responses.Envelope[any]
+//	@Failure		404				{object}	responses.Envelope[any]
+//	@Failure		500				{object}	responses.Envelope[any]
+//	@Router			/v1/competitions/{competitionID} [put]
 func putCompetition(ctx *echo.Context) error {
 	service := service.GetCompetitionService()
 
@@ -103,6 +145,16 @@ func putCompetition(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, competition)
 }
 
+// deleteCompetition deletes a competition.
+//
+//	@Summary		Delete competition
+//	@Tags			Competitions
+//	@Produce		json
+//	@Param			competitionID	path		integer	true	"Competition ID"
+//	@Success		200				{object}	responses.Envelope[models.Competition]
+//	@Failure		404				{object}	responses.Envelope[any]
+//	@Failure		500				{object}	responses.Envelope[any]
+//	@Router			/v1/competitions/{competitionID} [delete]
 func deleteCompetition(ctx *echo.Context) error {
 	service := service.GetCompetitionService()
 

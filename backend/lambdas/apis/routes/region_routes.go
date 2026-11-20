@@ -41,6 +41,14 @@ func newRegionRoutes() *RegionRoutes {
 	return routes
 }
 
+// queryRegions lists regions.
+//
+//	@Summary		List regions
+//	@Tags			Regions
+//	@Produce		json
+//	@Success		200	{object}	responses.Envelope[[]models.Region]
+//	@Failure		500	{object}	responses.Envelope[any]
+//	@Router			/v1/regions [get]
 func queryRegions(ctx *echo.Context) error {
 	service := service.GetRegionService()
 
@@ -52,6 +60,17 @@ func queryRegions(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, page)
 }
 
+// postRegion creates a region.
+//
+//	@Summary		Create region
+//	@Tags			Regions
+//	@Accept			json
+//	@Produce		json
+//	@Param			region	body		models.RegionRequest	true	"Region"
+//	@Success		200		{object}	responses.Envelope[models.Region]
+//	@Failure		400		{object}	responses.Envelope[any]
+//	@Failure		500		{object}	responses.Envelope[any]
+//	@Router			/v1/regions [post]
 func postRegion(ctx *echo.Context) error {
 	service := service.GetRegionService()
 
@@ -68,6 +87,16 @@ func postRegion(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, region)
 }
 
+// getRegion returns a region.
+//
+//	@Summary		Get region
+//	@Tags			Regions
+//	@Produce		json
+//	@Param			regionID	path		integer	true	"Region ID"
+//	@Success		200			{object}	responses.Envelope[models.Region]
+//	@Failure		404			{object}	responses.Envelope[any]
+//	@Failure		500			{object}	responses.Envelope[any]
+//	@Router			/v1/regions/{regionID} [get]
 func getRegion(ctx *echo.Context) error {
 	region, ok := ctx.Get("region").(*models.Region)
 	if ok && region != nil {
@@ -85,6 +114,19 @@ func getRegion(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, region)
 }
 
+// putRegion creates or updates a region.
+//
+//	@Summary		Update region
+//	@Tags			Regions
+//	@Accept			json
+//	@Produce		json
+//	@Param			regionID	path		integer					true	"Region ID"
+//	@Param			region		body		models.RegionRequest	true	"Region"
+//	@Success		200			{object}	responses.Envelope[models.Region]
+//	@Failure		400			{object}	responses.Envelope[any]
+//	@Failure		404			{object}	responses.Envelope[any]
+//	@Failure		500			{object}	responses.Envelope[any]
+//	@Router			/v1/regions/{regionID} [put]
 func putRegion(ctx *echo.Context) error {
 	service := service.GetRegionService()
 
@@ -103,6 +145,16 @@ func putRegion(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, region)
 }
 
+// deleteRegion deletes a region.
+//
+//	@Summary		Delete region
+//	@Tags			Regions
+//	@Produce		json
+//	@Param			regionID	path		integer	true	"Region ID"
+//	@Success		200			{object}	responses.Envelope[models.Region]
+//	@Failure		404			{object}	responses.Envelope[any]
+//	@Failure		500			{object}	responses.Envelope[any]
+//	@Router			/v1/regions/{regionID} [delete]
 func deleteRegion(ctx *echo.Context) error {
 	service := service.GetRegionService()
 

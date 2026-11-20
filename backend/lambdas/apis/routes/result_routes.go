@@ -41,6 +41,15 @@ func newResultRoutes() *ResultRoutes {
 	return routes
 }
 
+// queryResults lists an athlete's results.
+//
+//	@Summary		List results
+//	@Tags			Results
+//	@Produce		json
+//	@Param			athleteID	path		integer	true	"Athlete ID"
+//	@Success		200			{object}	responses.Envelope[[]models.Result]
+//	@Failure		500			{object}	responses.Envelope[any]
+//	@Router			/v1/results/athletes/{athleteID} [get]
 func queryResults(ctx *echo.Context) error {
 	service := service.GetResultService()
 
@@ -52,6 +61,20 @@ func queryResults(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, page)
 }
 
+// postResult creates a result.
+//
+//	@Summary		Create result
+//	@Tags			Results
+//	@Accept			json
+//	@Produce		json
+//	@Param			athleteID	path		integer					true	"Athlete ID"
+//	@Param			eventID		path		integer					true	"Event ID"
+//	@Param			result		body		models.ResultRequest	true	"Result"
+//	@Success		200			{object}	responses.Envelope[models.Result]
+//	@Failure		400			{object}	responses.Envelope[any]
+//	@Failure		404			{object}	responses.Envelope[any]
+//	@Failure		500			{object}	responses.Envelope[any]
+//	@Router			/v1/results/athletes/{athleteID}/events/{eventID} [post]
 func postResult(ctx *echo.Context) error {
 	service := service.GetResultService()
 
@@ -68,6 +91,17 @@ func postResult(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, result)
 }
 
+// getResult returns an athlete's result for an event.
+//
+//	@Summary		Get result
+//	@Tags			Results
+//	@Produce		json
+//	@Param			athleteID	path		integer	true	"Athlete ID"
+//	@Param			eventID		path		integer	true	"Event ID"
+//	@Success		200			{object}	responses.Envelope[models.Result]
+//	@Failure		404			{object}	responses.Envelope[any]
+//	@Failure		500			{object}	responses.Envelope[any]
+//	@Router			/v1/results/athletes/{athleteID}/events/{eventID} [get]
 func getResult(ctx *echo.Context) error {
 	result, ok := ctx.Get("result").(*models.Result)
 	if ok && result != nil {
@@ -83,6 +117,20 @@ func getResult(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, result)
 }
 
+// putResult creates or updates a result.
+//
+//	@Summary		Update result
+//	@Tags			Results
+//	@Accept			json
+//	@Produce		json
+//	@Param			athleteID	path		integer					true	"Athlete ID"
+//	@Param			eventID		path		integer					true	"Event ID"
+//	@Param			result		body		models.ResultRequest	true	"Result"
+//	@Success		200			{object}	responses.Envelope[models.Result]
+//	@Failure		400			{object}	responses.Envelope[any]
+//	@Failure		404			{object}	responses.Envelope[any]
+//	@Failure		500			{object}	responses.Envelope[any]
+//	@Router			/v1/results/athletes/{athleteID}/events/{eventID} [put]
 func putResult(ctx *echo.Context) error {
 	service := service.GetResultService()
 
@@ -100,6 +148,17 @@ func putResult(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, result)
 }
 
+// deleteResult deletes an athlete's result for an event.
+//
+//	@Summary		Delete result
+//	@Tags			Results
+//	@Produce		json
+//	@Param			athleteID	path		integer	true	"Athlete ID"
+//	@Param			eventID		path		integer	true	"Event ID"
+//	@Success		200			{object}	responses.Envelope[models.Result]
+//	@Failure		404			{object}	responses.Envelope[any]
+//	@Failure		500			{object}	responses.Envelope[any]
+//	@Router			/v1/results/athletes/{athleteID}/events/{eventID} [delete]
 func deleteResult(ctx *echo.Context) error {
 	service := service.GetResultService()
 

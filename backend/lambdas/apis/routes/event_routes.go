@@ -41,6 +41,14 @@ func newEventRoutes() *EventRoutes {
 	return routes
 }
 
+// queryEvents lists events.
+//
+//	@Summary		List events
+//	@Tags			Events
+//	@Produce		json
+//	@Success		200	{object}	responses.Envelope[[]models.Event]
+//	@Failure		500	{object}	responses.Envelope[any]
+//	@Router			/v1/events [get]
 func queryEvents(ctx *echo.Context) error {
 	service := service.GetEventService()
 
@@ -52,6 +60,17 @@ func queryEvents(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, page)
 }
 
+// postEvent creates a event.
+//
+//	@Summary		Create event
+//	@Tags			Events
+//	@Accept			json
+//	@Produce		json
+//	@Param			event	body		models.EventRequest	true	"Event"
+//	@Success		200		{object}	responses.Envelope[models.Event]
+//	@Failure		400		{object}	responses.Envelope[any]
+//	@Failure		500		{object}	responses.Envelope[any]
+//	@Router			/v1/events [post]
 func postEvent(ctx *echo.Context) error {
 	service := service.GetEventService()
 
@@ -68,6 +87,16 @@ func postEvent(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, event)
 }
 
+// getEvent returns an event.
+//
+//	@Summary		Get event
+//	@Tags			Events
+//	@Produce		json
+//	@Param			eventID	path		integer	true	"Event ID"
+//	@Success		200		{object}	responses.Envelope[models.Event]
+//	@Failure		404		{object}	responses.Envelope[any]
+//	@Failure		500		{object}	responses.Envelope[any]
+//	@Router			/v1/events/{eventID} [get]
 func getEvent(ctx *echo.Context) error {
 	event, ok := ctx.Get("event").(*models.Event)
 	if ok && event != nil {
@@ -85,6 +114,19 @@ func getEvent(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, event)
 }
 
+// putEvent creates or updates an event.
+//
+//	@Summary		Update event
+//	@Tags			Events
+//	@Accept			json
+//	@Produce		json
+//	@Param			eventID	path		integer					true	"Event ID"
+//	@Param			event	body		models.EventRequest		true	"Event"
+//	@Success		200		{object}	responses.Envelope[models.Event]
+//	@Failure		400		{object}	responses.Envelope[any]
+//	@Failure		404		{object}	responses.Envelope[any]
+//	@Failure		500		{object}	responses.Envelope[any]
+//	@Router			/v1/events/{eventID} [put]
 func putEvent(ctx *echo.Context) error {
 	service := service.GetEventService()
 
@@ -103,6 +145,16 @@ func putEvent(ctx *echo.Context) error {
 	return responses.Success(ctx, http.StatusOK, event)
 }
 
+// deleteEvent deletes an event.
+//
+//	@Summary		Delete event
+//	@Tags			Events
+//	@Produce		json
+//	@Param			eventID	path		integer	true	"Event ID"
+//	@Success		200		{object}	responses.Envelope[models.Event]
+//	@Failure		404		{object}	responses.Envelope[any]
+//	@Failure		500		{object}	responses.Envelope[any]
+//	@Router			/v1/events/{eventID} [delete]
 func deleteEvent(ctx *echo.Context) error {
 	service := service.GetEventService()
 

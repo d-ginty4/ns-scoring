@@ -1,12 +1,1250 @@
 basePath: /api
+definitions:
+  models.Athlete:
+    properties:
+      competition:
+        $ref: '#/definitions/models.Competition'
+      competitionId:
+        type: integer
+      country:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        format: date-time
+        type: string
+      division:
+        $ref: '#/definitions/models.Division'
+      divisionId:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - country
+    - divisionId
+    - name
+    type: object
+  models.AthleteRequest:
+    properties:
+      country:
+        type: string
+      divisionId:
+        type: integer
+      name:
+        type: string
+    required:
+    - country
+    - divisionId
+    - name
+    type: object
+  models.Competition:
+    properties:
+      country:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        format: date-time
+        type: string
+      iconName:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      region:
+        $ref: '#/definitions/models.Region'
+      regionId:
+        type: integer
+      updatedAt:
+        type: string
+    required:
+    - country
+    - name
+    - regionId
+    type: object
+  models.CompetitionRequest:
+    properties:
+      country:
+        type: string
+      iconName:
+        type: string
+      name:
+        type: string
+      regionId:
+        type: integer
+    required:
+    - country
+    - name
+    - regionId
+    type: object
+  models.Division:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        format: date-time
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - gender
+    - name
+    type: object
+  models.DivisionRequest:
+    properties:
+      gender:
+        enum:
+        - male
+        - female
+        type: string
+      name:
+        type: string
+    required:
+    - gender
+    - name
+    type: object
+  models.Event:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        format: date-time
+        type: string
+      eventNumber:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      scoringMethod:
+        type: string
+      updatedAt:
+        type: string
+      weightOptionsMen:
+        items:
+          type: integer
+        type: array
+      weightOptionsWomen:
+        items:
+          type: integer
+        type: array
+    required:
+    - eventNumber
+    - name
+    - scoringMethod
+    - weightOptionsMen
+    - weightOptionsWomen
+    type: object
+  models.EventRequest:
+    properties:
+      eventNumber:
+        type: integer
+      name:
+        type: string
+      scoringMethod:
+        type: string
+      weightOptionsMen:
+        items:
+          type: integer
+        type: array
+      weightOptionsWomen:
+        items:
+          type: integer
+        type: array
+    required:
+    - eventNumber
+    - name
+    - scoringMethod
+    - weightOptionsMen
+    - weightOptionsWomen
+    type: object
+  models.Region:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        format: date-time
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - name
+    type: object
+  models.RegionRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  models.Result:
+    properties:
+      athlete:
+        $ref: '#/definitions/models.Athlete'
+      athleteId:
+        type: integer
+      createdAt:
+        type: string
+      deletedAt:
+        format: date-time
+        type: string
+      didNotParticipate:
+        type: boolean
+      event:
+        $ref: '#/definitions/models.Event'
+      eventId:
+        type: integer
+      id:
+        type: integer
+      updatedAt:
+        type: string
+      value:
+        type: integer
+      weight:
+        type: integer
+    required:
+    - value
+    - weight
+    type: object
+  models.ResultRequest:
+    properties:
+      didNotParticipate:
+        type: boolean
+      value:
+        type: integer
+      weight:
+        type: integer
+    required:
+    - value
+    - weight
+    type: object
+  responses.APIError:
+    properties:
+      details:
+        example:
+        - '''cursor'' invalid cursor'
+        items:
+          type: string
+        type: array
+      message:
+        example: validation failed
+        type: string
+    type: object
+  responses.Envelope-any:
+    properties:
+      data: {}
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-array_models_Athlete:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Athlete'
+        type: array
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-array_models_Competition:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Competition'
+        type: array
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-array_models_Division:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Division'
+        type: array
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-array_models_Event:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Event'
+        type: array
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-array_models_Region:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Region'
+        type: array
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-array_models_Result:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Result'
+        type: array
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-models_Athlete:
+    properties:
+      data:
+        $ref: '#/definitions/models.Athlete'
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-models_Competition:
+    properties:
+      data:
+        $ref: '#/definitions/models.Competition'
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-models_Division:
+    properties:
+      data:
+        $ref: '#/definitions/models.Division'
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-models_Event:
+    properties:
+      data:
+        $ref: '#/definitions/models.Event'
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-models_Region:
+    properties:
+      data:
+        $ref: '#/definitions/models.Region'
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
+  responses.Envelope-models_Result:
+    properties:
+      data:
+        $ref: '#/definitions/models.Result'
+      error:
+        $ref: '#/definitions/responses.APIError'
+      requestID:
+        type: string
+    type: object
 host: localhost:3000
 info:
   contact: {}
   description: Documentation for all the apis. Every /api/v1 JSON response uses responses.Envelope
     with requestID, data, and error fields.
   title: APIs
-  version: "0.1"
-paths: {}
+  version: "1"
+paths:
+  /v1/competitions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-array_models_Competition'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: List competitions
+      tags:
+      - Competitions
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Competition
+        in: body
+        name: competition
+        required: true
+        schema:
+          $ref: '#/definitions/models.CompetitionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Competition'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Create competition
+      tags:
+      - Competitions
+  /v1/competitions/{competitionID}:
+    delete:
+      parameters:
+      - description: Competition ID
+        in: path
+        name: competitionID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Competition'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Delete competition
+      tags:
+      - Competitions
+    get:
+      parameters:
+      - description: Competition ID
+        in: path
+        name: competitionID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Competition'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Get competition
+      tags:
+      - Competitions
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Competition ID
+        in: path
+        name: competitionID
+        required: true
+        type: integer
+      - description: Competition
+        in: body
+        name: competition
+        required: true
+        schema:
+          $ref: '#/definitions/models.CompetitionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Competition'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Update competition
+      tags:
+      - Competitions
+  /v1/competitions/{competitionID}/athletes:
+    get:
+      parameters:
+      - description: Competition ID
+        in: path
+        name: competitionID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-array_models_Athlete'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: List athletes
+      tags:
+      - Athletes
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Competition ID
+        in: path
+        name: competitionID
+        required: true
+        type: integer
+      - description: Athlete
+        in: body
+        name: athlete
+        required: true
+        schema:
+          $ref: '#/definitions/models.AthleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Athlete'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Create athlete
+      tags:
+      - Athletes
+  /v1/competitions/{competitionID}/athletes/{athleteID}:
+    delete:
+      parameters:
+      - description: Competition ID
+        in: path
+        name: competitionID
+        required: true
+        type: integer
+      - description: Athlete ID
+        in: path
+        name: athleteID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Athlete'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Delete athlete
+      tags:
+      - Athletes
+    get:
+      parameters:
+      - description: Competition ID
+        in: path
+        name: competitionID
+        required: true
+        type: integer
+      - description: Athlete ID
+        in: path
+        name: athleteID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Athlete'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Get athlete
+      tags:
+      - Athletes
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Competition ID
+        in: path
+        name: competitionID
+        required: true
+        type: integer
+      - description: Athlete ID
+        in: path
+        name: athleteID
+        required: true
+        type: integer
+      - description: Athlete
+        in: body
+        name: athlete
+        required: true
+        schema:
+          $ref: '#/definitions/models.AthleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Athlete'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Update athlete
+      tags:
+      - Athletes
+  /v1/divisions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-array_models_Division'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: List divisions
+      tags:
+      - Divisions
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Division
+        in: body
+        name: division
+        required: true
+        schema:
+          $ref: '#/definitions/models.DivisionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Division'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Create division
+      tags:
+      - Divisions
+  /v1/divisions/{divisionID}:
+    delete:
+      parameters:
+      - description: Division ID
+        in: path
+        name: divisionID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Division'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Delete division
+      tags:
+      - Divisions
+    get:
+      parameters:
+      - description: Division ID
+        in: path
+        name: divisionID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Division'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Get division
+      tags:
+      - Divisions
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Division ID
+        in: path
+        name: divisionID
+        required: true
+        type: integer
+      - description: Division
+        in: body
+        name: division
+        required: true
+        schema:
+          $ref: '#/definitions/models.DivisionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Division'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Update division
+      tags:
+      - Divisions
+  /v1/events:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-array_models_Event'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: List events
+      tags:
+      - Events
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Event
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.EventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Create event
+      tags:
+      - Events
+  /v1/events/{eventID}:
+    delete:
+      parameters:
+      - description: Event ID
+        in: path
+        name: eventID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Event'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Delete event
+      tags:
+      - Events
+    get:
+      parameters:
+      - description: Event ID
+        in: path
+        name: eventID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Event'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Get event
+      tags:
+      - Events
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Event ID
+        in: path
+        name: eventID
+        required: true
+        type: integer
+      - description: Event
+        in: body
+        name: event
+        required: true
+        schema:
+          $ref: '#/definitions/models.EventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Update event
+      tags:
+      - Events
+  /v1/regions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-array_models_Region'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: List regions
+      tags:
+      - Regions
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Region
+        in: body
+        name: region
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Region'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Create region
+      tags:
+      - Regions
+  /v1/regions/{regionID}:
+    delete:
+      parameters:
+      - description: Region ID
+        in: path
+        name: regionID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Region'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Delete region
+      tags:
+      - Regions
+    get:
+      parameters:
+      - description: Region ID
+        in: path
+        name: regionID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Region'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Get region
+      tags:
+      - Regions
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Region ID
+        in: path
+        name: regionID
+        required: true
+        type: integer
+      - description: Region
+        in: body
+        name: region
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Region'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Update region
+      tags:
+      - Regions
+  /v1/results/athletes/{athleteID}:
+    get:
+      parameters:
+      - description: Athlete ID
+        in: path
+        name: athleteID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-array_models_Result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: List results
+      tags:
+      - Results
+  /v1/results/athletes/{athleteID}/events/{eventID}:
+    delete:
+      parameters:
+      - description: Athlete ID
+        in: path
+        name: athleteID
+        required: true
+        type: integer
+      - description: Event ID
+        in: path
+        name: eventID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Result'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Delete result
+      tags:
+      - Results
+    get:
+      parameters:
+      - description: Athlete ID
+        in: path
+        name: athleteID
+        required: true
+        type: integer
+      - description: Event ID
+        in: path
+        name: eventID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Result'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Get result
+      tags:
+      - Results
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Athlete ID
+        in: path
+        name: athleteID
+        required: true
+        type: integer
+      - description: Event ID
+        in: path
+        name: eventID
+        required: true
+        type: integer
+      - description: Result
+        in: body
+        name: result
+        required: true
+        schema:
+          $ref: '#/definitions/models.ResultRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Create result
+      tags:
+      - Results
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Athlete ID
+        in: path
+        name: athleteID
+        required: true
+        type: integer
+      - description: Event ID
+        in: path
+        name: eventID
+        required: true
+        type: integer
+      - description: Result
+        in: body
+        name: result
+        required: true
+        schema:
+          $ref: '#/definitions/models.ResultRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-models_Result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Update result
+      tags:
+      - Results
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and the JWT.
