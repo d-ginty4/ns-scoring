@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 
 	"apis/exceptions"
@@ -72,13 +73,14 @@ func getResult(ctx *echo.Context, athleteID string, eventID string) (*models.Res
 func createResult(ctx *echo.Context, athleteID string, eventID string, req *models.ResultRequest) (*models.Result, error) {
 	resultRepository := repository.GetResultRepository()
 
-	athlete, err := idFromPath(athleteID, "athlete")
-	if err != nil {
-		return nil, err
+	// Get the event and athlete from context
+	athlete, ok := ctx.Get("athlete").(*models.Athlete)
+	if !ok || athlete == nil {
+		panic("athlete no exist")
 	}
-	event, err := idFromPath(eventID, "event")
-	if err != nil {
-		return nil, err
+	event, ok := ctx.Get("event").(*models.Event)
+	if !ok || event == nil {
+		panic("event no exist")
 	}
 
 	if _, err := resultRepository.GetResult(ctx, athleteID, eventID); err == nil {
@@ -87,10 +89,27 @@ func createResult(ctx *echo.Context, athleteID string, eventID string, req *mode
 		return nil, err
 	}
 
+	// Check that the weight in the request is one of the options in this event
+	var allowedWeights []int
+	if athlete.Division.Gender == "male" {
+		allowedWeights = event.WeightOptionsMen
+	} else if athlete.Division.Gender == "female" {
+		allowedWeights = event.WeightOptionsWomen
+	} else {
+		// this should never happen
+		panic("athelte division has no gender")
+	}
+	if !slices.Contains(allowedWeights, req.Weight) {
+		return nil, exceptions.NewErrBadEntity(fmt.Sprintf(
+			"weight %d is not one of the allowed %s options for this event %d: %s - %v",
+			req.Weight, athlete.Division.Gender, event.EventNumber, event.Name, allowedWeights,
+		))
+	}
+
 	result := models.Result{
 		ResultRequest: *req,
-		AthleteId:     athlete,
-		EventId:       event,
+		AthleteId:     athlete.ID,
+		EventId:       event.ID,
 	}
 
 	if err := resultRepository.PutResult(ctx, &result); err != nil {

@@ -40,7 +40,7 @@ func EventExists(fl validator.FieldLevel) bool {
 
 func AthleteExists(fl validator.FieldLevel) bool {
 	return recordExists(fl, func(id string) error {
-		_, err := repository.GetAthleteRepository().GetAthleteByID(nil, id)
+		_, err := repository.GetAthleteRepository().GetAthlete(nil, id)
 		return err
 	})
 }

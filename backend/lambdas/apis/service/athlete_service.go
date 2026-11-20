@@ -57,7 +57,7 @@ func queryAthletes(ctx *echo.Context, competitionID string) (*[]models.Athlete, 
 func getAthlete(ctx *echo.Context, competitionID string, id string) (*models.Athlete, error) {
 	athleteRepository := repository.GetAthleteRepository()
 
-	athlete, err := athleteRepository.GetAthlete(ctx, competitionID, id)
+	athlete, err := athleteRepository.GetAthlete(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, exceptions.NewErrNotFound(fmt.Sprintf("athlete with id %s not found", id))
@@ -102,7 +102,7 @@ func updateAthlete(ctx *echo.Context, competitionID string, athleteID string, re
 	}
 
 	if athlete == nil {
-		a, err := repository.GetAthlete(ctx, competitionID, athleteID)
+		a, err := repository.GetAthlete(ctx, athleteID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, exceptions.NewErrNotFound(fmt.Sprintf("athlete with id %s not found", athleteID))
@@ -110,6 +110,9 @@ func updateAthlete(ctx *echo.Context, competitionID string, athleteID string, re
 			return nil, err
 		}
 		athlete = a
+	}
+	if err := ensureAthleteInCompetition(athlete, competitionID); err != nil {
+		return nil, err
 	}
 	athlete.AthleteRequest = *req
 	athlete.CompetitionID = id
@@ -128,11 +131,28 @@ func updateAthlete(ctx *echo.Context, competitionID string, athleteID string, re
 func deleteAthlete(ctx *echo.Context, competitionID string, id string) error {
 	athleteRepository := repository.GetAthleteRepository()
 
-	if err := athleteRepository.DeleteAthlete(ctx, competitionID, id); err != nil {
+	if _, err := getAthlete(ctx, competitionID, id); err != nil {
+		return err
+	}
+	if err := athleteRepository.DeleteAthlete(ctx, id); err != nil {
 		return err
 	}
 
 	logger.Action(ctx, "delete_athlete", "competitionID", competitionID, "athleteID", id)
+	return nil
+}
+
+func ensureAthleteInCompetition(athlete *models.Athlete, competitionID string) error {
+	if competitionID == "" {
+		return nil
+	}
+	id, err := competitionIDFromPath(competitionID)
+	if err != nil {
+		return err
+	}
+	if athlete.CompetitionID != id {
+		return exceptions.NewErrNotFound(fmt.Sprintf("athlete with id %d is not part of competition %s", athlete.ID, competitionID))
+	}
 	return nil
 }
 
