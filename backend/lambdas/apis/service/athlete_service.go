@@ -15,11 +15,12 @@ import (
 )
 
 type AthleteService struct {
-	QueryAthletes func(ctx *echo.Context, competitionID string) (*[]models.Athlete, error)
-	CreateAthlete func(ctx *echo.Context, competitionID string, req *models.AthleteRequest) (*models.Athlete, error)
-	GetAthlete    func(ctx *echo.Context, competitionID string, id string) (*models.Athlete, error)
-	UpdateAthlete func(ctx *echo.Context, competitionID string, athleteID string, req *models.AthleteRequest, existingAthlete *models.Athlete) (*models.Athlete, error)
-	DeleteAthlete func(ctx *echo.Context, competitionID string, id string) error
+	QueryAthletes  func(ctx *echo.Context, competitionID string) (*[]models.Athlete, error)
+	CreateAthlete  func(ctx *echo.Context, competitionID string, req *models.AthleteRequest) (*models.Athlete, error)
+	CreateAthletes func(ctx *echo.Context, competitionID string, req *models.AthletesRequest) (*[]models.Athlete, error)
+	GetAthlete     func(ctx *echo.Context, competitionID string, id string) (*models.Athlete, error)
+	UpdateAthlete  func(ctx *echo.Context, competitionID string, athleteID string, req *models.AthleteRequest, existingAthlete *models.Athlete) (*models.Athlete, error)
+	DeleteAthlete  func(ctx *echo.Context, competitionID string, id string) error
 }
 
 var athleteService *AthleteService
@@ -33,11 +34,12 @@ func GetAthleteService() *AthleteService {
 
 func newAthleteService() *AthleteService {
 	service := &AthleteService{
-		QueryAthletes: queryAthletes,
-		CreateAthlete: createAthlete,
-		GetAthlete:    getAthlete,
-		UpdateAthlete: updateAthlete,
-		DeleteAthlete: deleteAthlete,
+		QueryAthletes:  queryAthletes,
+		CreateAthlete:  createAthlete,
+		CreateAthletes: createAthletes,
+		GetAthlete:     getAthlete,
+		UpdateAthlete:  updateAthlete,
+		DeleteAthlete:  deleteAthlete,
 	}
 
 	athleteService = service
@@ -91,6 +93,33 @@ func createAthlete(ctx *echo.Context, competitionID string, req *models.AthleteR
 
 	logger.Action(ctx, "create_athlete", "competitionID", competitionID, "athleteID", athlete.ID)
 	return &athlete, nil
+}
+
+func createAthletes(ctx *echo.Context, competitionID string, req *models.AthletesRequest) (*[]models.Athlete, error) {
+	repo := repository.GetAthleteRepository()
+
+	id, err := competitionIDFromPath(competitionID)
+	if err != nil {
+		return nil, err
+	}
+
+	athletes := make([]models.Athlete, len(req.Athletes))
+	for i, item := range req.Athletes {
+		athletes[i] = models.Athlete{
+			AthleteRequest: item,
+			CompetitionID:  id,
+		}
+	}
+
+	if err := repo.CreateAthletes(ctx, &athletes); err != nil {
+		if errors.Is(err, gorm.ErrForeignKeyViolated) {
+			return nil, exceptions.NewErrBadEntity("one or more divisions do not exist")
+		}
+		return nil, err
+	}
+
+	logger.Action(ctx, "create_athletes", "competitionID", competitionID, "count", len(athletes))
+	return &athletes, nil
 }
 
 func updateAthlete(ctx *echo.Context, competitionID string, athleteID string, req *models.AthleteRequest, athlete *models.Athlete) (*models.Athlete, error) {

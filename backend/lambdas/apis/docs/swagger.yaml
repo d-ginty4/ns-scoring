@@ -24,6 +24,7 @@ definitions:
       updatedAt:
         type: string
     required:
+    - competitionId
     - country
     - divisionId
     - name
@@ -40,6 +41,16 @@ definitions:
     - country
     - divisionId
     - name
+    type: object
+  models.AthletesRequest:
+    properties:
+      athletes:
+        items:
+          $ref: '#/definitions/models.AthleteRequest'
+        minItems: 1
+        type: array
+    required:
+    - athletes
     type: object
   models.Competition:
     properties:
@@ -680,6 +691,44 @@ paths:
           schema:
             $ref: '#/definitions/responses.Envelope-any'
       summary: Update athlete
+      tags:
+      - Athletes
+  /v1/competitions/{competitionID}/athletes/bulk:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Competition ID
+        in: path
+        name: competitionID
+        required: true
+        type: integer
+      - description: Athletes
+        in: body
+        name: athletes
+        required: true
+        schema:
+          $ref: '#/definitions/models.AthletesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.Envelope-array_models_Athlete'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.Envelope-any'
+      summary: Create athletes
       tags:
       - Athletes
   /v1/divisions:

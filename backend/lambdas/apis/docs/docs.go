@@ -313,6 +313,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/competitions/{competitionID}/athletes/bulk": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Athletes"
+                ],
+                "summary": "Create athletes",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Competition ID",
+                        "name": "competitionID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Athletes",
+                        "name": "athletes",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AthletesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.Envelope-array_models_Athlete"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/responses.Envelope-any"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/responses.Envelope-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/responses.Envelope-any"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/competitions/{competitionID}/athletes/{athleteID}": {
             "get": {
                 "produces": [
@@ -1331,6 +1389,7 @@ const docTemplate = `{
         "models.Athlete": {
             "type": "object",
             "required": [
+                "competitionId",
                 "country",
                 "divisionId",
                 "name"
@@ -1385,6 +1444,21 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "models.AthletesRequest": {
+            "type": "object",
+            "required": [
+                "athletes"
+            ],
+            "properties": {
+                "athletes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/models.AthleteRequest"
+                    }
                 }
             }
         },

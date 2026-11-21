@@ -35,10 +35,20 @@ func (sv *structValidator) Validate(i any) error {
 
 	errors := make([]string, 0)
 	for _, fe := range verrs {
-		errors = append(errors, fmt.Sprintf("'%s' %s", fe.Field(), describe(fe)))
+		errors = append(errors, fmt.Sprintf("'%s' %s", fieldLabel(fe), describe(fe)))
 	}
 
 	return &exceptions.ErrValidation{Errors: errors}
+}
+
+// fieldLabel keeps a top-level failure as the field name and includes the
+// index for nested items, for example athletes[1].divisionId.
+func fieldLabel(fe validator.FieldError) string {
+	ns := fe.Namespace()
+	if i := strings.Index(ns, "."); i >= 0 && i < len(ns)-1 {
+		return ns[i+1:]
+	}
+	return fe.Field()
 }
 
 func describe(fe validator.FieldError) string {
@@ -48,6 +58,9 @@ func describe(fe validator.FieldError) string {
 	case "oneof":
 		return fmt.Sprintf("must be one of: [%s]", fe.Param())
 	case "min":
+		if fe.Kind() == reflect.Slice || fe.Kind() == reflect.Array || fe.Kind() == reflect.Map {
+			return "must contain at least " + fe.Param() + " items"
+		}
 		return "must be at least " + fe.Param() + " characters"
 	case "max":
 		return "must be at most " + fe.Param() + " characters"

@@ -12,6 +12,10 @@ type AthleteRequest struct {
 	DivisionID uint   `json:"divisionId" gorm:"not null;index" validate:"required,divisionExists"`
 }
 
+type AthletesRequest struct {
+	Athletes []AthleteRequest `json:"athletes" validate:"required,min=1,dive"`
+}
+
 type Athlete struct {
 	Common
 	AthleteRequest

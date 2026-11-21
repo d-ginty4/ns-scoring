@@ -14,6 +14,7 @@ import (
 type AthleteRoutes struct {
 	QueryAthletes func(c *echo.Context) error
 	PostAthlete   func(c *echo.Context) error
+	PostAthletes  func(c *echo.Context) error
 	GetAthlete    func(c *echo.Context) error
 	PutAthlete    func(c *echo.Context) error
 	DeleteAthlete func(c *echo.Context) error
@@ -32,6 +33,7 @@ func newAthleteRoutes() *AthleteRoutes {
 	routes := &AthleteRoutes{
 		QueryAthletes: queryAthletes,
 		PostAthlete:   postAthlete,
+		PostAthletes:  postAthletes,
 		GetAthlete:    getAthlete,
 		PutAthlete:    putAthlete,
 		DeleteAthlete: deleteAthlete,
@@ -89,6 +91,35 @@ func postAthlete(ctx *echo.Context) error {
 	}
 
 	return responses.Success(ctx, http.StatusOK, athlete)
+}
+
+// postAthletes bulk creates athletes in a competition.
+//
+//	@Summary		Bulk create athletes
+//	@Tags			Athletes
+//	@Accept			json
+//	@Produce		json
+//	@Param			competitionID	path		integer					true	"Competition ID"
+//	@Param			athletes		body		models.AthletesRequest	true	"Athletes"
+//	@Success		200				{object}	responses.Envelope[[]models.Athlete]
+//	@Failure		400				{object}	responses.Envelope[any]
+//	@Failure		404				{object}	responses.Envelope[any]
+//	@Failure		500				{object}	responses.Envelope[any]
+//	@Router			/v1/competitions/{competitionID}/athletes/bulk [post]
+func postAthletes(ctx *echo.Context) error {
+	service := service.GetAthleteService()
+
+	var body models.AthletesRequest
+	if err := utils.BindAndValidate(ctx, &body); err != nil {
+		return err
+	}
+
+	athletes, err := service.CreateAthletes(ctx, ctx.Param("competitionID"), &body)
+	if err != nil {
+		return err
+	}
+
+	return responses.Success(ctx, http.StatusOK, athletes)
 }
 
 // getAthlete returns an athlete.

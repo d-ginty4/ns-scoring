@@ -71,6 +71,7 @@ func SetupRoutes(e *echo.Echo) {
 
 	// Athlete Routes (/api/v1/competitions/:competitionID/athletes)
 	competitionGroupID.POST("/athletes", athleteRoutes.PostAthlete)
+	competitionGroupID.POST("/athletes/bulk", athleteRoutes.PostAthletes)
 	competitionGroupID.GET("/athletes", athleteRoutes.QueryAthletes)
 	athleteGroupID := competitionGroupID.Group("/athletes/:athleteID", middleware.CheckAthleteExist)
 	athleteGroupID.GET("", athleteRoutes.GetAthlete)

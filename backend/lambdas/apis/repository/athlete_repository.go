@@ -4,13 +4,15 @@ import (
 	"apis/models"
 
 	"github.com/labstack/echo/v5"
+	"gorm.io/gorm"
 )
 
 type AthleteRepository struct {
-	QueryAthletes func(ctx *echo.Context, competitionID string) (*[]models.Athlete, error)
-	PutAthlete    func(ctx *echo.Context, athlete *models.Athlete) error
-	GetAthlete    func(ctx *echo.Context, athleteID string) (*models.Athlete, error)
-	DeleteAthlete func(ctx *echo.Context, athleteID string) error
+	QueryAthletes  func(ctx *echo.Context, competitionID string) (*[]models.Athlete, error)
+	PutAthlete     func(ctx *echo.Context, athlete *models.Athlete) error
+	CreateAthletes func(ctx *echo.Context, athletes *[]models.Athlete) error
+	GetAthlete     func(ctx *echo.Context, athleteID string) (*models.Athlete, error)
+	DeleteAthlete  func(ctx *echo.Context, athleteID string) error
 }
 
 var athleteRepository *AthleteRepository
@@ -25,10 +27,11 @@ func GetAthleteRepository() *AthleteRepository {
 
 func newAthleteRepository() *AthleteRepository {
 	repository := &AthleteRepository{
-		QueryAthletes: queryAthletes,
-		PutAthlete:    putAthlete,
-		GetAthlete:    getAthlete,
-		DeleteAthlete: deleteAthlete,
+		QueryAthletes:  queryAthletes,
+		PutAthlete:     putAthlete,
+		CreateAthletes: createAthletes,
+		GetAthlete:     getAthlete,
+		DeleteAthlete:  deleteAthlete,
 	}
 
 	athleteRepository = repository
@@ -41,6 +44,35 @@ func queryAthletes(ctx *echo.Context, competitionID string) (*[]models.Athlete, 
 	}
 	var athletes []models.Athlete
 	return &athletes, db.Preload("Competition.Region").Preload("Division").Where("competition_id = ?", competitionID).Find(&athletes).Error
+}
+
+func createAthletes(ctx *echo.Context, athletes *[]models.Athlete) error {
+	if db == nil {
+		ConnectDB()
+	}
+
+	if len(*athletes) == 0 {
+		return nil
+	}
+
+	return db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Omit("Competition", "Division").Create(athletes).Error; err != nil {
+			return err
+		}
+
+		ids := make([]uint, len(*athletes))
+		for i, athlete := range *athletes {
+			ids[i] = athlete.ID
+		}
+
+		var loaded []models.Athlete
+		if err := tx.Preload("Competition.Region").Preload("Division").Find(&loaded, ids).Error; err != nil {
+			return err
+		}
+
+		*athletes = loaded
+		return nil
+	})
 }
 
 func putAthlete(ctx *echo.Context, athlete *models.Athlete) error {
