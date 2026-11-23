@@ -1,0 +1,66 @@
+[
+	{
+		"name": "U72",
+		"gender": "male"
+	},
+	{
+		"name": "U80",
+		"gender": "male"
+	},
+	{
+		"name": "U90",
+		"gender": "male"
+	},
+	{
+		"name": "U105",
+		"gender": "male"
+	},
+	{
+		"name": "Open",
+		"gender": "male"
+	},
+	{
+		"name": "U90 Masters",
+		"gender": "male"
+	},
+	{
+		"name": "Open Masters",
+		"gender": "male"
+	},
+	{
+		"name": "50+ Masters",
+		"gender": "male"
+	},
+	{
+		"name": "U57",
+		"gender": "female"
+	},
+	{
+		"name": "U64",
+		"gender": "female"
+	},
+	{
+		"name": "U73",
+		"gender": "female"
+	},
+	{
+		"name": "U82",
+		"gender": "female"
+	},
+	{
+		"name": "Open",
+		"gender": "female"
+	},
+	{
+		"name": "U73 Masters",
+		"gender": "female"
+	},
+	{
+		"name": "Open Masters",
+		"gender": "female"
+	},
+	{
+		"name": "50+ Masters",
+		"gender": "female"
+	}
+]

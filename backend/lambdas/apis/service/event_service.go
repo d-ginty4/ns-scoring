@@ -10,7 +10,6 @@ import (
 	"apis/models"
 	"apis/repository"
 
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 )

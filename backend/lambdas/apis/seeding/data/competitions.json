@@ -1,0 +1,42 @@
+[
+	{
+		"name": "Ireland Nationals",
+		"country": "Ireland",
+		"region": "Ireland & The UK"
+	},
+	{
+		"name": "England Nationals",
+		"country": "England",
+		"region": "Ireland & The UK"
+	},
+	{
+		"name": "Scotland Nationals",
+		"country": "Scotland",
+		"region": "Ireland & The UK"
+	},
+	{
+		"name": "Wales Nationals",
+		"country": "Wales",
+		"region": "Ireland & The UK"
+	},
+	{
+		"name": "California Nationals",
+		"country": "United States",
+		"region": "North America"
+	},
+	{
+		"name": "Texas Nationals",
+		"country": "United States",
+		"region": "North America"
+	},
+	{
+		"name": "New York Nationals",
+		"country": "United States",
+		"region": "North America"
+	},
+	{
+		"name": "Canada Nationals",
+		"country": "Canada",
+		"region": "North America"
+	}
+]
