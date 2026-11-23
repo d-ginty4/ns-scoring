@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Faker, en, en_CA, en_GB, en_IE, en_US } from "@faker-js/faker";
-import { competitionsUrl, divisionsUrl, eventsUrl, regionsUrl } from "./constants.ts";
+import { competitionsUrl, divisionsUrl, eventsUrl, regionsUrl, resultsUrl } from "./constants.ts";
 
 const athletesPerDivision = 10;
 
@@ -43,6 +43,40 @@ const uniqueName = (country: string, gender: string, used: Set<string>) => {
   throw new Error(`could not generate a unique ${gender} name for ${country}`);
 };
 
+type SeededEvent = {
+  id: number;
+  scoringMethod: string;
+  weightOptionsMen: number[];
+  weightOptionsWomen: number[];
+};
+
+const resultValue = (faker: Faker, scoringMethod: string) => {
+  if (scoringMethod === "reps") {
+    return faker.number.int({ min: 1, max: 15 });
+  }
+  if (scoringMethod === "time") {
+    return faker.number.int({ min: 15, max: 90 });
+  }
+  if (scoringMethod === "distance") {
+    return faker.number.int({ min: 5, max: 60 });
+  }
+
+  throw new Error(`unknown scoring method ${scoringMethod}`);
+};
+
+const mockResult = (faker: Faker, event: SeededEvent, gender: string) => {
+  const weights = gender === "female" ? event.weightOptionsWomen : event.weightOptionsMen;
+  if (weights.length === 0) {
+    throw new Error(`event ${event.id} has no ${gender} weights`);
+  }
+
+  return {
+    eventId: event.id,
+    weight: faker.helpers.arrayElement(weights),
+    value: resultValue(faker, event.scoringMethod),
+  };
+};
+
 const dataDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "data");
 
 type Envelope<T> = { data: T };
@@ -71,8 +105,10 @@ const main = async () => {
   }
 
   const events = JSON.parse(await readFile(path.join(dataDir, "events.json"), "utf8")) as unknown[];
+  const seededEvents: SeededEvent[] = [];
   for (const event of events) {
-    await post(eventsUrl, event);
+    const created = await post<SeededEvent>(eventsUrl, event);
+    seededEvents.push(created.data);
   }
 
   const divisions = JSON.parse(await readFile(path.join(dataDir, "divisions.json"), "utf8")) as {
@@ -118,7 +154,17 @@ const main = async () => {
       }));
     });
 
-    await post(`${competitionsUrl}/${created.data.id}/athletes/bulk`, { athletes });
+    const createdAthletes = await post<{ id: number; division: { gender: string } }[]>(
+      `${competitionsUrl}/${created.data.id}/athletes/bulk`,
+      { athletes },
+    );
+
+    const faker = fakerFor(competition.country);
+    for (const athlete of createdAthletes.data) {
+      await post(`${resultsUrl}/athletes/${athlete.id}`, {
+        results: seededEvents.map((event) => mockResult(faker, event, athlete.division.gender)),
+      });
+    }
   }
 };
 
