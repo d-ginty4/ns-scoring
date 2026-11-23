@@ -86,7 +86,14 @@ func NewEchoInstance() *echo.Echo {
 	v.RegisterValidation("eventExists", validators.EventExists)
 	v.RegisterValidation("athleteExists", validators.AthleteExists)
 
-	e := echo.New()
+	e := echo.NewWithConfig(echo.Config{
+		Router: echo.NewRouter(echo.RouterConfig{
+			AllowOverwritingRoute: true,
+			// Group middleware registers its own not-found routes with this handler,
+			// so unknown paths under those groups use the same response.
+			NotFoundHandler: routes.NotFound,
+		}),
+	})
 	e.Logger = logger.Logger()
 	e.Validator = &structValidator{validator: v}
 	e.HTTPErrorHandler = responses.HTTPErrorHandler

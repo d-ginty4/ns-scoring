@@ -3,12 +3,14 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"apis/exceptions"
 	"apis/logger"
 	"apis/models"
 	"apis/repository"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 )
@@ -77,6 +79,9 @@ func createEvent(ctx *echo.Context, req *models.EventRequest) (*models.Event, er
 
 	if err := repository.PutEvent(ctx, &event); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			if strings.Contains(err.Error(), "event_number") {
+				return nil, exceptions.NewErrBadEntity(fmt.Sprintf("event with eventNumber %d already exists", event.EventNumber))
+			}
 			return nil, exceptions.NewErrBadEntity(fmt.Sprintf("event with name %s already exists", event.Name))
 		}
 		return nil, err
@@ -103,6 +108,9 @@ func updateEvent(ctx *echo.Context, eventID string, req *models.EventRequest, ev
 
 	if err := repository.PutEvent(ctx, event); err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			if strings.Contains(err.Error(), "event_number") {
+				return nil, exceptions.NewErrBadEntity(fmt.Sprintf("event with eventNumber %d already exists", event.EventNumber))
+			}
 			return nil, exceptions.NewErrBadEntity(fmt.Sprintf("event with name %s already exists", event.Name))
 		}
 		return nil, err

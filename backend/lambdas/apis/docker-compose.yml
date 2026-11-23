@@ -17,5 +17,23 @@ services:
       timeout: 5s
       retries: 5
 
+  api:
+    build: .
+    container_name: ns-scoring-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      APP_ENV: local
+      DB_HOST: postgres
+      DB_USER: local
+      DB_PASSWORD: local
+      DB_NAME: ns-scoring
+      DB_PORT: "5432"
+      DB_SSLMODE: disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_data:

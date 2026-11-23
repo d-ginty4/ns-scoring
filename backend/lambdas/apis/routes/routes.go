@@ -81,6 +81,7 @@ func SetupRoutes(e *echo.Echo) {
 	// Result Routes (/api/v1/results/athletes/:athleteID/events/:eventID)
 	resultGroup := base.Group("/results")
 	resultGroup.GET("/athletes/:athleteID", resultRoutes.QueryResults, middleware.CheckAthleteExist)
+	resultGroup.POST("/athletes/:athleteID", resultRoutes.PostAthleteResults, middleware.CheckAthleteExist)
 	resultEventGroup := resultGroup.Group("/athletes/:athleteID/events/:eventID", middleware.CheckAthleteExist, middleware.CheckEventExist)
 	resultEventGroup.POST("", resultRoutes.PostResult)
 	resultEventGroup.GET("", resultRoutes.GetResult, middleware.CheckResultExist)
@@ -91,4 +92,9 @@ func SetupRoutes(e *echo.Echo) {
 	e.GET("/routes", func(c *echo.Context) error {
 		return c.JSON(http.StatusOK, e.Router().Routes())
 	})
+}
+
+// NotFound is the handler for requests that match no route.
+func NotFound(c *echo.Context) error {
+	return echo.NewHTTPError(http.StatusNotFound, "route not found")
 }

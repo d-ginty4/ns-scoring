@@ -12,11 +12,12 @@ import (
 )
 
 type ResultRoutes struct {
-	QueryResults func(c *echo.Context) error
-	PostResult   func(c *echo.Context) error
-	GetResult    func(c *echo.Context) error
-	PutResult    func(c *echo.Context) error
-	DeleteResult func(c *echo.Context) error
+	QueryResults       func(c *echo.Context) error
+	PostResult         func(c *echo.Context) error
+	PostAthleteResults func(c *echo.Context) error
+	GetResult          func(c *echo.Context) error
+	PutResult          func(c *echo.Context) error
+	DeleteResult       func(c *echo.Context) error
 }
 
 var resultRoutes *ResultRoutes
@@ -30,11 +31,12 @@ func getResultRoutes() *ResultRoutes {
 
 func newResultRoutes() *ResultRoutes {
 	routes := &ResultRoutes{
-		QueryResults: queryResults,
-		PostResult:   postResult,
-		GetResult:    getResult,
-		PutResult:    putResult,
-		DeleteResult: deleteResult,
+		QueryResults:       queryResults,
+		PostResult:         postResult,
+		PostAthleteResults: postAthleteResults,
+		GetResult:          getResult,
+		PutResult:          putResult,
+		DeleteResult:       deleteResult,
 	}
 
 	resultRoutes = routes
@@ -89,6 +91,35 @@ func postResult(ctx *echo.Context) error {
 	}
 
 	return responses.Success(ctx, http.StatusOK, result)
+}
+
+// postAthleteResults creates an athlete's result for every event.
+//
+//	@Summary		Create athlete results
+//	@Tags			Results
+//	@Accept			json
+//	@Produce		json
+//	@Param			athleteID	path		integer							true	"Athlete ID"
+//	@Param			results		body		models.AthleteResultsRequest	true	"Results"
+//	@Success		200			{object}	responses.Envelope[[]models.Result]
+//	@Failure		400			{object}	responses.Envelope[any]
+//	@Failure		404			{object}	responses.Envelope[any]
+//	@Failure		500			{object}	responses.Envelope[any]
+//	@Router			/v1/results/athletes/{athleteID} [post]
+func postAthleteResults(ctx *echo.Context) error {
+	service := service.GetResultService()
+
+	var body models.AthleteResultsRequest
+	if err := utils.BindAndValidate(ctx, &body); err != nil {
+		return err
+	}
+
+	results, err := service.CreateAthleteResults(ctx, ctx.Param("athleteID"), &body)
+	if err != nil {
+		return err
+	}
+
+	return responses.Success(ctx, http.StatusOK, results)
 }
 
 // getResult returns an athlete's result for an event.

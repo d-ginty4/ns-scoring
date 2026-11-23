@@ -56,6 +56,23 @@ func mapError(c *echo.Context, err error) (int, APIError) {
 		return he.Code, APIError{Message: msg}
 	}
 
+	// Echo's built-in sentinels (ErrNotFound, ErrMethodNotAllowed) implement
+	// HTTPStatusCoder but are not *HTTPError.
+	var statusCoder echo.HTTPStatusCoder
+	if errors.As(err, &statusCoder) {
+		code := statusCoder.StatusCode()
+		if code != 0 {
+			if code >= 500 {
+				logger.From(c).Error("request failed", logger.Err(err))
+			}
+			msg := http.StatusText(code)
+			if code == http.StatusNotFound {
+				msg = "route not found"
+			}
+			return code, APIError{Message: msg}
+		}
+	}
+
 	logger.From(c).Error("request failed", logger.Err(err))
 	return http.StatusInternalServerError, APIError{Message: "internal server error"}
 }

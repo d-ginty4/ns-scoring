@@ -1,4 +1,4 @@
-.PHONY : run tables docs connect
+.PHONY : run tables docs connect seed
 
 run:
 	LOG_LEVEL=debug APP_ENV=local go run main.go
@@ -11,3 +11,6 @@ docs:
 
 connect:
 	psql -h localhost -p 5432 -U local -d ns-scoring
+
+seed:
+	cd seeding && tsx main.ts
