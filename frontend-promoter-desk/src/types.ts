@@ -1,76 +1,53 @@
-export const eventIds = ["log", "deadlift", "loading", "farmers", "carry"] as const;
+export type Gender = "male" | "female";
 
-export type EventId = (typeof eventIds)[number];
+type Common = {
+	id: string
+	createdAt: string
+	updatedAt: string
+	deletedAt: string
+}
 
-export type Gender = "men" | "women";
+export type Region = Common & {
+	name: string
+}
 
-export type Measure = "reps" | "time" | "distance";
+export type Event = Common & {
+	name: string
+	eventNumber: number
+	weightOptionsMen: number[]
+	weightOptionsWomen: number[]
+	scoringMethod: string
+}
 
-export type EventDef = {
-  id: EventId;
-  name: string;
-  short: string;
-  weights: Record<Gender, number[]>;
-  weightLabel: string;
-  measure: Measure;
-  note: string;
-};
+export type Division = Common & {
+	name: string
+	gender: Gender
+}
 
-export type Category = {
-  id: string;
-  gender: Gender;
-  label: string;
-  short: string;
-};
+export type Competition = Common & {
+	name: string
+	country: string
+	iconName: string
+	region: Region
+}
 
-export type Promoter = {
-  id: string;
-  name: string;
-  short: string;
-  region: string;
-};
+export type Athlete = Common & {
+	name: string
+	country: string
+	competition: Competition
+	division: Division
+}
 
-export type Competition = {
-  id: string;
-  name: string;
-  country: string;
-};
+export type Result = Common & {
+	weight: number
+	value: number
+	didNotParticipate: boolean
+	event: Event
+	athlete: Athlete
+}
 
-export type EventResult = {
-  weight: number | null;
-  value: number | null;
-  enteredBy: string | null;
-  skipped: boolean;
-};
-
-export type ResultUpdate = {
-  weight: number | null;
-  value: number | null;
-  skipped?: boolean;
-};
-
-export type Athlete = {
-  id: string;
-  name: string;
-  country: string;
-  gender: Gender;
-  categoryId: string;
-  competitionId: string;
-  bodyweight: number;
-  withdrawn: boolean;
-  results: Record<EventId, EventResult>;
-};
-
-export type EventScore = {
-  place: number | null;
-  points: number;
-};
-
-export type AthleteStanding = {
-  athlete: Athlete;
-  events: Record<EventId, EventScore>;
-  total: number;
-  wins: number;
-  place: number;
-  tied: boolean;
-};
+export type Response<T> = {
+	requestId: string
+	data: T
+	error: object
+}

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { PromoterDesk } from "./components/PromoterDesk";
 import { createAthlete, events, seedAthletes, type NewAthlete } from "./data";
-import type { Athlete, EventId, ResultUpdate } from "./types";
+import type { Athlete, EventId, ResultUpdate } from "./oldTypes";
+import {Sun, Moon} from "lucide-react"
 
 export default function App() {
   const [athletes, setAthletes] = useState<Athlete[]>(() => structuredClone(seedAthletes));
@@ -86,7 +87,7 @@ export default function App() {
               aria-checked={dark}
               aria-label="Dark mode"
               onClick={toggleTheme}
-              className="relative grid h-9 w-[4.75rem] shrink-0 grid-cols-2 overflow-hidden rounded-full border border-white/25 bg-white/10 p-0.5"
+              className="relative grid h-9 w-19 shrink-0 grid-cols-2 overflow-hidden rounded-full border border-white/25 bg-white/10 p-0.5"
             >
             <span
               aria-hidden="true"
@@ -95,10 +96,10 @@ export default function App() {
               }`}
             />
             <span className={`relative z-10 flex items-center justify-center ${dark ? "text-white/55" : "text-white"}`}>
-              <SunIcon />
+              <Sun size={20}/>
             </span>
             <span className={`relative z-10 flex items-center justify-center ${dark ? "text-white" : "text-white/55"}`}>
-              <MoonIcon />
+              <Moon size={20} />
             </span>
             </button>
             <button type="button" className="rounded-md border border-white/25 px-3 py-2 text-sm font-medium text-white">
@@ -120,31 +121,3 @@ export default function App() {
   );
 }
 
-function SunIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
-      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        d="M12 2.5v2.5M12 19v2.5M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M2.5 12H5M19 12h2.5M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"
-      />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-        d="M20.5 14.5A8.2 8.2 0 0 1 9.5 3.2 7 7 0 1 0 20.5 14.5z"
-      />
-    </svg>
-  );
-}

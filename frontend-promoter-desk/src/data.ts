@@ -8,7 +8,7 @@ import {
   type EventResult,
   type Gender,
   type Promoter,
-} from "./types";
+} from "./oldTypes";
 
 type AthleteSeed = Omit<Athlete, "competitionId" | "withdrawn">;
 

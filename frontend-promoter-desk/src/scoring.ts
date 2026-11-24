@@ -1,5 +1,5 @@
 import { events } from "./data";
-import type { Athlete, AthleteStanding, EventId, EventResult, EventScore, Gender } from "./types";
+import type { Athlete, AthleteStanding, EventId, EventResult, EventScore, Gender } from "./oldTypes";
 
 export function isRecorded(result: EventResult): result is EventResult & { weight: number; value: number } {
   return result.weight !== null && result.value !== null;

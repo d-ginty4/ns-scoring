@@ -1,4 +1,4 @@
-import type { EventDef, EventResult, EventScore } from "./types";
+import type { EventDef, EventResult, EventScore } from "./oldTypes";
 import { isRecorded } from "./scoring";
 
 function trimNumber(value: number): string {

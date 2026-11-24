@@ -12,7 +12,7 @@ import {
 } from "../data";
 import { formatResult, joinNames } from "../format";
 import { eventScores, isRecorded, needsResult } from "../scoring";
-import { eventIds, type Athlete, type Category, type EventDef, type EventId, type EventResult, type Gender, type ResultUpdate } from "../types";
+import { eventIds, type Athlete, type Category, type EventDef, type EventId, type EventResult, type Gender, type ResultUpdate } from "../oldTypes";
 import { Segmented } from "./Segmented";
 
 type EntryMode = "event" | "card";
